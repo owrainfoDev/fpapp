@@ -1,0 +1,64 @@
+label.error
+{
+    color:red;
+    font-family:verdana, Helvetica;
+    font-size:11px;
+}
+/* textarea.error input.error { border-color: red;} */
+.dropzone{
+	border:none;
+	display:flex;
+	flex-wrap:wrap;
+	margin-top:10px;
+}
+
+.dropzone.dz-clickable{
+	min-height: auto;
+    	margin: 0;
+    	display: flex;
+}
+
+.dropzone .dz-preview{
+	margin:0;
+	min-height:auto;
+}
+
+.dropzone .dz-preview .dz-progress{
+	display:none;
+
+}
+
+.dropzone .dz-preview .dz-details{
+	display:none;
+}
+
+.dropzone .dz-preview .dz-image{
+	border-radius:0;
+	width:50px;
+	height:40px;
+	margin: 0 10px;
+}
+
+.dropzone .dz-preview .dz-image img{
+	width:100%;
+}
+
+.dropzone .dz-preview .dz-remove{
+	font-size:0;
+	position: absolute;
+    	bottom: 0;
+    	z-index: 11;
+    	right: 0px;
+	background:url(/resources/images/icon/icon_colse_img.png) no-repeat center / 100%;
+	width: 15px;
+    	height: 15px;
+}
+.dropzone .dz-preview .dz-image img {
+    border: 1px solid #EDEDED;
+    margin: 2px;
+    border-radius: 15%;
+}
+
+.dropzone .dz-preview .dz-error-mark{
+    display:none;
+}
