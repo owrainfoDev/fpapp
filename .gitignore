@@ -85,7 +85,7 @@ phpunit
 #-------------------------
 # Composer
 #-------------------------
-vendor/
+#vendor/
 
 #-------------------------
 # IDE / Development Files
@@ -122,6 +122,7 @@ nb-configuration.xml
 
 # Visual Studio Code
 .vscode/
+.history/
 
 /results/
 /phpunit*.xml
