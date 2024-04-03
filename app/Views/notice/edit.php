@@ -354,7 +354,7 @@ $(function () {
         paramName: "file",
         autoProcessQueue : false,
         acceptedFiles: "image/*",
-        maxFiles: typeof _maxfiles !== "undefined" ? _maxfiles : 10,
+        maxFiles: typeof _maxfiles !== "undefined" ? _maxfiles : 30,
         maxFilesize: 30, // MB
         uploadMultiple: typeof _uploadMultiple !== "undefined" ? _uploadMultiple : true,
         parallelUploads: typeof _parallelUploads !== "undefined" ? _parallelUploads : 100 , // use it with uploadMultiple
@@ -553,12 +553,10 @@ $(function () {
     
     $("#fileupload").validate({
         rules: {
-            noteTitle: "required",
-            noteTxt: "required",
+            noteTitle: "required"
         },
         messages: {
-            noteTitle: "제목을 입력해 주세요",
-            noteTxt: "내용을 입력해 주세요",
+            noteTitle: "제목을 입력해 주세요"
         },
         submitHandler: function(form) {
             // return false;

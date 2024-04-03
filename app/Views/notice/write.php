@@ -179,8 +179,9 @@ $(document).ready(function(){
 </style>
 
 <script>
-$(function () {
-    var editor = new FroalaEditor("#noteTxt", {
+    var editor ;
+
+     editor = new FroalaEditor("#noteTxt", {
 	        'key': '5OA4gF4D3I3G3B6C4D-13TMIBDIa2NTMNZFFPFZe2a1Id1f1I1fA8D6C4F4G3H3I2A18A15A6=='
 	        ,'height': 290
 	        // , imageUploadParam: 'uploadImg'
@@ -196,8 +197,9 @@ $(function () {
 	        // // Allow to upload PNG and JPG.
 	        // , imageAllowedTypes: ['jpeg', 'jpg', 'png']
 		});
+    
+        
 
-});
 
 </script>
 
@@ -327,12 +329,15 @@ $(function () {
 
     function tempviewtempsave(t){
         if ( sessionStorage.getItem(t) != null ){
-            $('#' + t).val(sessionStorage.getItem(t));
+            if ( t == 'noteTxt'){
+                editor.html.set(sessionStorage.getItem(t));
+            } else {
+                $('#' + t).val(sessionStorage.getItem(t));
+            }
         }
     }
 
     function goSubmit(){
-        console.log('전송');
         $("#fileupload").submit();
     }
 
@@ -361,7 +366,7 @@ $(function () {
                     toast: true,
                     position: 'center-center',
                     showConfirmButton: false,
-                    timer: 3000,
+                    timer: 1000,
                     timerProgressBar: true,
                     didOpen: (toast) => {
                         toast.addEventListener('mouseenter', Swal.stopTimer)
