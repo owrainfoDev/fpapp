@@ -11,45 +11,36 @@ class Notice extends BaseController
     public $pagename = '알림장';
     public $pn = 'notice';
 
-    protected $data;
+    protected $data = [];
     protected $meal;
     protected $authinfo;
-    protected $user_id;
+    // protected $user_id;
     protected $userinfo;
     protected $is_teacher;
     protected $year;
     protected $class_list;
     protected $stdInfo;
-    protected $limit = 1;
+    protected $limit = 5;
     protected $aca_id;
+    protected $login;
+    protected $std_id;
+    protected $user_id;
+    protected $checkAuth;
 
     public function __construct()
     {
+
         $session = session();
-        $this->user_id = $session->get('_user_id');
-        $this->authinfo = new \App\Models\AuthorInfo($this->user_id);
-        $this->authinfo->year = $session->get("year");
-        $this->userinfo = $this->authinfo->info();
-        $this->is_teacher = $this->authinfo->is_teacher();
-        $this->year = $session->get("year");
-
-        $students = new \App\Models\Students();
-        $params = [
-            'userid' => $this->user_id,
-            'aca_id' => $this->userinfo->ACA_ID,
-            'is_teacher' => $this->is_teacher === true ? "Y" : "N",
-            'year' => $this->year
-        ];
-
-        $this->aca_id = $this->userinfo->ACA_ID;
-        if ($this->is_teacher !== true) {
-            $this->stdInfo = $this->authinfo->stdInfo($session->get('_std_id'));
-            $params['std_id'] = $session->get("_std_id");
-            $this->aca_id = $this->stdInfo['ACA_ID'];
-        }
-
-        $this->class_list = $students->getClassListFromTeacher($params);  // 학원 리스트
-
+        if (! $session->has('user_id') ){
+            $this->getUserAuth();
+        } 
+        $this->is_teacher = $session->get('is_teacher');
+        $this->year = $session->get('year');
+        $this->user_id = $session->get('user_id');
+        $this->std_id = $session->get('std_id');
+        $this->aca_id = $session->get('aca_id');
+        $this->class_list = $session->get('class_list');
+        $this->checkAuth = $session->get('checkAuth');
 
     }
 
@@ -59,29 +50,58 @@ class Notice extends BaseController
 
     public function list()
     {
-        // return view('welcome_message');
-
         $noticelist = [];
-        
+        $noticelist = $this->proc('getlists');
+
+        $data = json_decode($noticelist);
+
         $data = [
             'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
-            'list' => $noticelist,
+            'list' => $data,
+            'parameter' => $this->data,
+            'is_teacher' => $this->is_teacher
         ];
         return $this->template('notice/notice', $data , 'sub');
+
+    }
+
+    public function moreList(){
+
+        $noticelist = $this->proc('getlists');
+        $result = json_decode($noticelist);
+
+        $data = [
+            'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
+            'list' => $result,
+            'parameter' => $this->data,
+            'is_teacher' => $this->is_teacher
+        ];
+        ob_start();
+        $this->template('notice/morelist', $data , 'none');
+        $list = ob_get_contents();
+        ob_end_clean();
+
+        return json_encode([
+            'html' => $list,
+            'total_page' => $result->total_page,
+            'page' => $result->page
+        ]);
+
 
     }
 
     public function proc($p = null){
         
         $content = trim(file_get_contents("php://input"));
-        $this->data = json_decode($content, true);
-
-
-        if ($content == "" && ( $_REQUEST ) ){
-            $this->data = $_REQUEST;
+        $this->data = (Array)json_decode($content, true);
+        if (  $_REQUEST  ){
+             $this->data = $_REQUEST;
         }
-
-        return $this->{$this->data['action']}();
+        if ( $p ) {
+            return $this->{$p}();
+        } else {
+            return $this->{$this->data['action']}();
+        }
     }
 
     public function getStudentfromclasscd(){
@@ -97,27 +117,29 @@ class Notice extends BaseController
     }
     public function getlists(){
 
-        $session = session();
         $params = [
-            'userid' => $this->data['USER_ID'],
+            'userid' => $this->user_id,
             'aca_id' => $this->aca_id,
-            'is_teacher' => $this->data['is_teacher'] === true ? "Y" : "N",
-            'year' => $this->data['year']
+            'is_teacher' => $this->is_teacher === true ? "Y" : "N",
+            'year' => $this->year,
+            
         ];
 
-        $params['search'] = $this->data['search'] == '' ? '' : $this->data['search'];
-        $params['current'] = $this->data['page'];
-        $params['perPage'] = $this->data['perPage'];
+        $params['search'] = $this->data['search'] ?? '';
+        $params['current'] = $this->data['page'] ?? 1;
+        $params['perPage'] = $this->limit;
 
-        if ( $this->data['is_teacher'] !== true ) {
-            $params['std_id'] = $session->get('_std_id');
+        if ( $this->is_teacher !== true ) {
+            $params['std_id'] = $this->std_id;
+        } else {
+            $params['checkAuth'] = $this->checkAuth;
         }
         
         $noticemodel = new \App\Models\Notice();
         $list = $noticemodel->lists($params);
         $data = $list;
 
-        echo json_encode( $data );
+        return json_encode( $data );
         die();
         // return 
     }
@@ -155,7 +177,12 @@ class Notice extends BaseController
             ],
             'noti_seq' => $noti_seq
         ];
-        return $this->template('notice/detail', $data , 'sub');
+        ob_start();
+        $this->template('notice/detail', $data , 'none');
+        $html = ob_get_contents();
+        ob_end_clean();
+
+        return $html;
     }
 
     public function getdetail(){

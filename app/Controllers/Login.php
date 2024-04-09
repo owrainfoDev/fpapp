@@ -12,8 +12,9 @@ class Login extends BaseController
 
     // public $apiUrl = 'http://192.168.10.227:8800';
 
-    // public $apiUrl = 'https://api.kyowonwiz.com/wiz';
-    public $apiUrl = 'http://localhost:8800/fp';
+    public $apiUrl = 'https://api.kyowonwiz.com/fp';
+    
+    // public $apiUrl = 'http://localhost:8800/fp';
 
     public function index()
     {
@@ -46,6 +47,8 @@ class Login extends BaseController
         return $response;
     }
 
+    
+
     public function ajaxReqValidToken(){
         $content = trim(file_get_contents("php://input"));
         $accToken = json_decode($content, true);
@@ -56,12 +59,12 @@ class Login extends BaseController
         $response = curlBearSend($url, $sendToken);
         $result = json_decode($response);
 
-        if ( in_array( $_SERVER["REMOTE_ADDR"]  , array('106.254.236.154', '106.254.236.156') ) ) {
+        if ( in_array( $_SERVER["REMOTE_ADDR"]  , array('106.254.236.154', '106.254.236.156', '192.168.48.1') ) ) {
             $result = (object)[
                 'resultCode' => "1000",
                 'data' => (object)[
                         // 'user_id' => 'P01089354962',
-                        'user_id' => 'master_011',
+                        'user_id' => 'test01',
                     ]
             ];
 
@@ -81,15 +84,20 @@ class Login extends BaseController
             
             $session->set('_user_id', $result->data->user_id);
 
+            
+
             $return_param = array(
                 'resultCode' => $result->resultCode,
-                'resultMsg' => $result->resultMsg,
+                'resultMsg' => $result->resultMsg ?? '',
                 'is_teacher' => $is_teacher,
                 'user_id' => $result->data->user_id,
                 'user_nm' => $user_nm,
                 'aca_id' => $aca_id,
                 // 'academyYear' => $academyYear->baseAcademicyear()
             );
+
+            var_dump($return_param);
+            die();
 
             if ( $is_teacher == false ){
                 $childInfo = $author->getChildrenInfo();

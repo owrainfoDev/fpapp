@@ -33,8 +33,6 @@
 
             if ( $is_teacher == 'Y' ) {
 
-            
-
             $getquery = "SELECT NT.NOTI_SEQ
                             , NT.NOTI_TP
                             , FC_GET_CODE_NM('NOTI_TP', NT.NOTI_TP) AS NOTI_TP_NM
@@ -118,24 +116,20 @@
                 $query .= " AND NT.TITLE like '%". $search ."%' ";
             }
 
-            
             $countData = $this->db->query( $cntquery . $query )->getRow()->cnt ;
 
-            $current = $params['current'];
-            $perPage = $params['perPage'];
+            $current = (int)$params['current'];
+            $perPage = (int)$params['perPage'];
 
             $total_page = ceil($countData/$perPage);
+            
             $start = ($current-1)*$perPage;
-
             
             $limitquery = " limit " . $start . " , " . $perPage  . " ";
             $orderQuery = " ORDER BY NT.NOTI_SEQ DESC ";
             $query = $getquery . $query . $orderQuery . $limitquery  ;
 
-
             $data = $this->db->query($query);    
-
-            
             // get_compiled_select
             return array( 
                     'data' => $data->getResult() , 
@@ -143,7 +137,8 @@
                     "sql" => $query,
                     'count' => count($data->getResult()),
                     'total_row' => $countData,
-                    'total_page' => $total_page
+                    'total_page' => $total_page,
+                    'page' => $current
             );
 
         }

@@ -1,67 +1,8 @@
-<script type="text/javascript">
-function LoadContentTemplate(){
-    data = content_data;
-    
-    fetch("/api/profile", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        $('#topprofile').html(data.html);
-    })
-}
 
-</script>
-
-
-<script type="text/template" id="mainViewProfileTemplate2">
-<% if ( is_teacher == false ) { %>
-<div class="cont_txt">
-    <p class="name"><%= USER_NM %> <span class="parent">(학부모)</span></p>
-    <p class="office"><%= ACA_NM %></p>
-    <p class="level">FIRESTONE</p>
-</div>
-<div class="child_edit">
-    <ul>
-        <li>
-            <a href="">
-                <img src="resources/images/children-img1.png" alt="children image">
-            </a>
-        </li>
-        <li>
-            <a href="">
-                <img src="resources/images/children-img2.png" alt="children image">
-            </a>
-        </li>
-        <li>
-            <a href=""></a>
-        </li>
-    </ul>
-</div>
-<!-- [ 교사앱 : 교사앱에서만 보이기 - 로그인한 교사정보 ] -->
-<% } else { %>
-<div class="cont_txt">
-    <p class="name"><%= USER_NM %><span class="parent">(선생님)</span></p>
-    <p class="office"><%= ACA_NM %></p>
-</div>
-<% } %>
-
-</script>
-
-<style>
-    #icon_HomeCommingConsent , #icon_notice , #icon_waitingBtn  { display: none }
-</style>
 <!-- main -->
 <div class="main_container">
     <div class="h_main">
-        <div class="h_cont" id="topprofile">
-                
-                
-        </div>
+        <div class="h_cont" id="topprofile"></div>
 
     </div>
     <!-- [] -->
@@ -171,15 +112,32 @@ function LoadContentTemplate(){
         </div>
     </div>
 </div>
-
+<?php 
+    $session = session();
+    $session->destroy();
+    
+?>
 <!-- // main -->
 <script type="text/javascript">
 $(document).ready(function(){
     $(document).on('click', 'div.menu_cont > span[href]' , function(e){
         e.preventDefault();
+
+        var token = '5GVs4381FJ20Cxysysy7Yy5zwTQuATwOjT+yGj0IN5cK3yk3KBlLDiR4xXJX2Jl8lA3CbOlZdozY2GWLqiqCxLgPETAo+ADYgb9MFiemr9U41c9zBTG17loNQU6P15NzKbFT3wIUJX5cMTn6GFqtFtrVd5tYQI5M78NV7z4CElBQkHWSLjoKlkzBvzfD/pSnRlK5rMEUg2GEthfQSEkubVqR8ZNFoapXy2KQmtGHZl335N8DtVs8rZ0+hys5xjD+';
+        
         var href = $(this).attr('href');
+
         if ( typeof href != 'undefined'){
-            location.href=href;
+
+            let params = {
+                "token" : token,
+                // "std_id" : 'S00011056',
+                "aca_id" : 'FP00128',
+                "aca_year" : '2024',
+            }
+            
+            post(href, params );
+            
         }
     })
 })

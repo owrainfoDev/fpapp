@@ -36,7 +36,7 @@
 <link rel="stylesheet" href="/resources/justifiedGallery.min/justifiedGallery.min.css" />
 <script src="/resources/justifiedGallery.min/jquery.justifiedGallery.min.js"></script>
 <!-- content -->
-<div class="sub_content notice_content notice_detail">
+<!-- <div class="sub_content notice_content notice_detail"> -->
     <div class="sub_inner">
         
         <div class="notice_detail_list detail_list" id="detail">
@@ -59,11 +59,7 @@
             <?php endforeach;?>
         </div>
         <?php endif; ?>
-        <!-- <div class="detail_file">
-            <% _.each( file.file , function ( item , key ,list ) { %>
-                <a href="<%= item.FILE_PATH %>/<%= item.FILE_NM %>.<%= item.FILE_EXT %>" download><%= item.ORIGIN_FILE_NM %></a><br>
-            <% }) %>
-        </div> -->
+        
         <div class="detail_txt">
             <?php echo $detail->CNTS; ?>
         </div>
@@ -86,8 +82,9 @@
             </div>
         </div>
         <?php endif; ?>
+
     </div>
-</div>
+<!-- </div> -->
 
 <!-- //content -->
 <!-- Flipbook main Js file -->
@@ -104,8 +101,6 @@ var _rowHeight = 243;
                 captions: true,
                 randomize: false
             });
-
-
 
 function goEdit(){
     location.href="/notice/<?php echo $detail->NOTI_SEQ;?>/edit";

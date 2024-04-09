@@ -26,10 +26,10 @@ $routes->group('api', function ($routes) {
 $routes->group('/notice' , function($routes){
     $routes->add('','Notice::index');
     $routes->add('(:num)','Notice::detail/$1');
-    
+    $routes->add('proc/(:segment)' , 'Notice::proc/$1');
     $routes->add('(:num)/edit','Notice::edit/$1');
     $routes->add('write','Notice::write');
-    $routes->add('ajaxList','Notice::ajaxList');
+    $routes->add('moreList','Notice::moreList');
 } );
 
 // 오늘의 급식

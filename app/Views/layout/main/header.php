@@ -5,7 +5,7 @@
     <?php echo $this->include('./layout/common/css');?>
     <?php echo $this->include('./layout/common/js');?>
     <script type="text/javascript" src="resources/js/main.js"></script>
-    <?php echo $this->include('./layout/common/authjs');?>
+    <?php // echo $this->include('./layout/common/authjs');?>
 </head>
 <body class="home">
 

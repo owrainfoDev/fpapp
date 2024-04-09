@@ -1,6 +1,7 @@
 <?php 
     $contpn = isset( $header['pn'] ) ? $header['pn'] : 'main' ;
 ?>
+
 <script src="https://cdn.jsdelivr.net/npm/underscore@latest/underscore-umd-min.js"></script> 
 <script type="text/javascript">
 
@@ -145,7 +146,7 @@ window.onload = function(){
             if (window.flutter_inappwebview) window.flutter_inappwebview.callHandler('call', 'waiting') ;
         })
         
-<?php if ( in_array( $_SERVER["REMOTE_ADDR"]  , array('106.254.236.154','106.254.236.156') ) ) { ?>    
+<?php if ( in_array( $_SERVER["REMOTE_ADDR"]  , array('106.254.236.154','106.254.236.156' , '192.168.48.1') ) ) { ?>    
     
     if (!window.flutter_inappwebview) {
     // pc 용 확인
