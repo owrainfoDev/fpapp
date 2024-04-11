@@ -31,10 +31,11 @@ class Notice extends BaseController
     {
 
         $session = session();
-        if (! $session->has('user_id')  ){
+        if (! $session->has('user_id') ){
+            echo "123123";
             $this->getUserAuth();
         } 
-        $this->getUserAuth();
+        // $this->getUserAuth();
         $this->is_teacher = $session->get('is_teacher');
         $this->year = $session->get('year');
         $this->user_id = $session->get('user_id');
