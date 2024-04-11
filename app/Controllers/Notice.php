@@ -32,9 +32,10 @@ class Notice extends BaseController
 
         var_dump($_POST);
         $session = session();
-        if (! $session->has('user_id') ){
-            $this->getUserAuth();
-        } 
+        // if (! $session->has('user_id') ){
+        //     $this->getUserAuth();
+        // } 
+        $this->getUserAuth();
         $this->is_teacher = $session->get('is_teacher');
         $this->year = $session->get('year');
         $this->user_id = $session->get('user_id');
