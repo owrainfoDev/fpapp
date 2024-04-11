@@ -62,7 +62,7 @@ abstract class BaseController extends Controller
         helper("func");
         $request = service("request");
         
-        $token = $request->getPost('token');
+        $token = $request->getPost('token' , true);
         $std_id = $request->getPost('std_id');
         $aca_id = $request->getPost('aca_id');
         $aca_year = $request->getPost('aca_year');
