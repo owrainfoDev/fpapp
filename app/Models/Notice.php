@@ -130,7 +130,7 @@
             $limitquery = " limit " . $start . " , " . $perPage  . " ";
             $orderQuery = " ORDER BY NT.NOTI_SEQ DESC ";
             $query = $getquery . $query . $orderQuery . $limitquery  ;
-            echo $query;
+            // echo $query;
             $data = $this->db->query($query);    
             // get_compiled_select
             return array( 

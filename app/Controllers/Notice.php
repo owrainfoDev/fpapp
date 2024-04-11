@@ -30,6 +30,7 @@ class Notice extends BaseController
     public function __construct()
     {
 
+        var_dump($_POST);
         $session = session();
         if (! $session->has('user_id') ){
             $this->getUserAuth();
