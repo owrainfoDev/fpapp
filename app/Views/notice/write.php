@@ -1,53 +1,145 @@
-<!-- <?php echo CURRENT_PAGE_NAME ?> -->
+
+
+<!-- //content -->
+<link href="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/js/froala_editor.pkgd.min.js"></script>
+
+<div class="sub_content t_write_cont t_content notice_write">
+    <div class="sub_inner">
+        <form action="/api/notice" id="fileupload" method="POST" enctype="multipart/form-data">
+            <!-- <input type="hidden" name="action" value="writeProc"> -->
+            <input type="hidden" id="file" name="file" value="">
+            <div class="form_cont">
+                <div class="class" id="selclass">
+                    <!-- 선생님이 맡은 반 -->
+                    <select name="selctClass" id="selctClass">
+                        <option value="선택">선택</option>
+                        <?php foreach ( $class_list as $class ) :?>
+                            <option value="<?php echo $class->CLASS_CD;?>"><?php echo $class->CLASS_NM;?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="all">
+                    <span>전체</span>
+                    <input type="checkbox" name="classNotice" id="classNotice">
+                    <label for="classNotice"></label>
+                </div>
+                <div class="class_list write_list" id="stdList">
+                    
+                    
+                </div>
+            </div>
+            <div class="note_txt">
+                <input type="text" name="noteTitle" id="noteTitle" placeholder="제목을 입력해주세요." required>
+                <div class="txt_box">
+                    <textarea name="noteTxt" id="noteTxt" placeholder="내용을 입력해 주세요." required></textarea>
+                </div>
+            </div>
+
+            
+
+            <div class="form_file">
+                <span class="title">파일첨부</span>
+                <!-- [ 카메라 앱으로 이동? ] -->
+                <div class="camera">
+                <span id="phocnt" style="margin-right:5px">사진0</span><span id="vidcnt" style="margin-right:5px">동영상0</span>
+                    <i class="icon_image"></i>
+                </div>
+                
+                <div style="width:100%" id="dropzone" class="dropzone"> 파일 첨부 </div>
+
+                <p class="comm">
+                    동영상 1개, 사진 100개까지 첨부할 수 있습니다.
+                    <span>(동영상 30MB이하, 총 용량 500MB 이하)</span>
+                </p>
+            </div>
+
+            <div class="btn_box" style="margin-top: 30px;">
+                <button type="button" class="save left" id="tempsave">임시저장</button>
+                <button type="button" class="send right">보내기</button>
+            </div>
+            <!-- [ 교사앱 : 모달 ]  -->
+            <!-- <div class="modal">
+                <div class="cont">
+                    <p>등록하시겠습니까?</p>
+                    <div class="btn">
+                        <button type="button" class="cancel">취소</button>
+                        <button type="submit" class="confirm" id="submit-dropzone">확인</button>
+                    </div>
+                </div>
+            </div> -->
+        </form>
+    </div>
+</div>
+
 <script type="text/javascript">
-function LoadContentTemplate(){
-    content_data.action = 'getwrite';
-    content_data.noti_seq = '';
-    content_data.year = '2023';
-    console.log(JSON.stringify(content_data));
-    fetch("/api/notice", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(content_data),
-            })
-    .then((response) => response.json())
-    .then((data) => {
-        console.log(JSON.stringify(data));
-        var template = _.template($('#selclassTemplate').html());
-        var result = template( { classList: data.classList } );
-        $("#selclass").html( result );
-    });
-}
-function getStudentList(class_cd){
-    content_data.action = 'getStudentfromclasscd';
-    content_data.class_cd = class_cd;
-    fetch("/api/notice", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(content_data),
-            })
-    .then((response) => response.json())
-    .then((data) => {
-        var template = _.template($('#stdListTtemplate').html());
-        var result = template( { studentList: data } );
-        $("#stdList").html( result );
-    });
-}
+
+
+
+
+
+// function getStudentList(class_cd){
+
+    
+
+//     content_data.action = 'getStudentfromclasscd';
+//     content_data.class_cd = class_cd;
+//     fetch("/api/notice", {
+//                 method: "POST",
+//                 headers: {
+//                     "Content-Type": "application/json",
+//                 },
+//                 body: JSON.stringify(content_data),
+//             })
+//     .then((response) => response.json())
+//     .then((data) => {
+//         var template = _.template($('#stdListTtemplate').html());
+//         var result = template( { studentList: data } );
+//         $("#stdList").html( result );
+//     });
+// }
 
 
 
 $(document).ready(function(){
-    $(document).on('click', '.edit' , function(){
-        location.href="/notice/edit";
-    })
-
+    // 반선택
     $(document).on('change' , '#selctClass', function(){
-        var class_cd = $(this).val() ;
-        getStudentList(class_cd);
+        let class_cd = $(this).val() ;
+        let param = {
+            class_cd : class_cd
+        };
+
+        $.ajax({
+            type : 'post',
+            url : "/notice/proc/getStudentfromclasscd",
+            async : true,
+            dataType : 'json',
+            data : param,
+            beforeSend : function(){
+                loadingShowHide();
+            },
+            success : function(response)  {
+                loadingShowHide();
+                let html = '';
+                if (response.length > 0) {
+                     html = '<div class="class_name write_list_name">';
+                    $.each( response , function ( key , item){
+                        html += `<div class="name_list">
+                            <input type="checkbox" name="STD_ID" id="STD_ID${item.STD_ID}" value="${item.STD_ID}" class="_std_id">
+                            <label for="STD_ID${item.STD_ID}"></label>
+                            <span>${item.STD_NM}</span>
+                        </div>`;
+                    })
+                    html += "</div>";
+                } else {
+                    html = "<span>선택된 학생이 없습니다.</span>";
+                }
+                $('#stdList').html(html);
+            },
+            error : function(request, status, error){
+                console.log(error);
+            }
+        })
     });
 
     $(document).on('click' , '#classNotice' , function(){
@@ -68,102 +160,8 @@ $(document).ready(function(){
     })
 });
 </script>
-<!-- 선생님이 맡은 반 -->
-<script type="text/template" id="selclassTemplate">
-    <select name="selctClass" id="selctClass">
-    <option value="선택">선택</option>
-<% _.each(classList,function(item,key,list) { %>
-    <option value="<%= item.CLASS_CD %>"><%= item.CLASS_NM %></option>
-<% }) %>
-    </select>
-</script>
-<script type="text/template" id="stdListTtemplate">
-<div class="class_name write_list_name">
-    <!-- 반별 리스트 -->
-    <% _.each(studentList , function( item , key, list ) { %>
-    <div class="name_list">
-        <input type="checkbox" name="STD_ID" id="STD_ID<%= item.STD_ID %>" value="<%= item.STD_ID %>" class="_std_id">
-        <label for="STD_ID<%= item.STD_ID %>"></label>
-        <span><%= item.STD_NM %></span>
-    </div>
-    <% }) %>
-    <% if (studentList.length < 1 ) {%>
-        <span>선택된 학생이 없습니다.</span>
-    <% } %>
-</div>
-</script>
-<!-- //content -->
-<link href="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/js/froala_editor.pkgd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
-<div class="sub_content t_write_cont t_content notice_write">
-    <div class="sub_inner">
-        <form action="/api/notice" id="fileupload" method="POST" enctype="multipart/form-data">
-            <!-- <input type="hidden" name="action" value="writeProc"> -->
-            <input type="hidden" id="file" name="file" value="">
-            <div class="form_cont">
-                <div class="class" id="selclass">
 
-                </div>
-                <div class="all">
-                    <span>전체</span>
-                    <input type="checkbox" name="classNotice" id="classNotice">
-                    <label for="classNotice"></label>
-                </div>
-                <div class="class_list write_list" id="stdList">
-                    
-                </div>
-            </div>
-            <div class="note_txt">
-                <input type="text" name="noteTitle" id="noteTitle" placeholder="제목을 입력해주세요." required>
-                <div class="txt_box">
-                    <textarea name="noteTxt" id="noteTxt" placeholder="내용을 입력해 주세요." required></textarea>
-                </div>
-            </div>
 
-            
-
-            <div class="form_file">
-                <span class="title">파일첨부</span>
-                <!-- <input type="file" name="files[]" id="form_img" accept="image/*" multiple>
-                <!-- <span class="place">Image</span> ->
-                <div class="form-img-remove del_img" onClick=""><i></i></div>
-                <div class="form-img-section" style="display: none;">
-                    <img class="form-img-preview" src="#" />
-                </div> -->
-               
-                
-                <!-- [ 카메라 앱으로 이동? ] -->
-                <div class="camera">
-                <span id="phocnt" style="margin-right:5px">사진0</span><span id="vidcnt" style="margin-right:5px">동영상0</span>
-                    <i class="icon_image"></i>
-                </div>
-                
-                <div style="width:100%" id="dropzone" class="dropzone"> 파일 첨부 </div>
-
-                <p class="comm">
-                    동영상 1개, 사진 100개까지 첨부할 수 있습니다.
-                    <span>(동영상 30MB이하, 총 용량 500MB 이하)</span>
-                </p>
-            </div>
-
-            <div class="btn_box" style="margin-top: 30px;">
-                <button type="button" class="save left" id="tempsave">임시저장</button>
-                <button type="button" class="send right">보내기</button>
-            </div>
-            <!-- [ 교사앱 : 모달 ]  -->
-            <div class="modal">
-                <div class="cont">
-                    <p>등록하시겠습니까?</p>
-                    <div class="btn">
-                        <button type="button" class="cancel">취소</button>
-                        <button type="submit" class="confirm" id="submit-dropzone">확인</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 <script>
     // dropzone Setting
     var _maxfiles = 30;
@@ -175,7 +173,6 @@ $(document).ready(function(){
 <style>
      .t_content .form_file .camera i { margin-bottom: 5px;}
     .dropzone .dz-preview.dz-image-preview , .dropzone { background-color: #F1F1F5}
-
 </style>
 
 <script>
@@ -198,9 +195,6 @@ $(document).ready(function(){
 	        // , imageAllowedTypes: ['jpeg', 'jpg', 'png']
 		});
     
-        
-
-
 </script>
 
 <script type="text/javascript">
@@ -306,23 +300,23 @@ $(document).ready(function(){
             }
         }
 
-        $("#fileupload").validate({
-            rules: {
-                noteTitle: "required",
-                noteTxt: "required",
-            },
-            messages: {
-                noteTitle: "제목을 입력해 주세요",
-                noteTxt: "내용을 입력해 주세요",
-            },
-            submitHandler: function(form) {
-                // return false;
+        // $("#fileupload").validate({
+        //     rules: {
+        //         noteTitle: "required",
+        //         noteTxt: "required",
+        //     },
+        //     messages: {
+        //         noteTitle: "제목을 입력해 주세요",
+        //         noteTxt: "내용을 입력해 주세요",
+        //     },
+        //     submitHandler: function(form) {
+        //         // return false;
 
-                // console.log(content_data);
-                checkvalid();
-                return false;
-            }
-        });
+        //         // console.log(content_data);
+        //         checkvalid();
+        //         return false;
+        //     }
+        // });
 
         
     });

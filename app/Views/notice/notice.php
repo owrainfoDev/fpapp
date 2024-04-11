@@ -52,93 +52,102 @@
     </div>
     <!-- [ 교사앱 : 공지사항 쓰기 ] -->
 </div>
-<div class="sub_content notice_content notice_detail" id="viewDetail" style="display:none"></div>
-
 <!-- //content -->
+<!-- detail view -->
+<div class="sub_content notice_content notice_detail" id="viewDetail" style="display:none"></div>
+<!-- // detail view -->
+<!-- write view -->
+<div class="sub_content t_write_cont t_content notice_write" id="viewForm" style="display:none"></div>
+<!-- write view -->
 
 <input type="hidden" id="pages" value="<?php echo $list->page;?>">
 
 <script type="text/javascript">
-    $(document).ready(function(){
-        $('#viewDetail').empty();
+$(document).ready(function(){
+    $('#viewDetail').empty();
+    
+    $(document).on('click' , '#SearchBtn', function(){
+        let href = '/notice';
+        let search = $('#noticeSearch').val();
+        if ( search.length != 0 && search.length < 2){
+            alert('검색은 2글자 이상입력하여주세요');
+            $('#noticeSearch').focus();
+            return ;
+        }
+        let params = {
+            "search" : search
+        }
+        post(href, params  , 'get');
 
-
-        $(document).on('click' , '#SearchBtn', function(){
-            let href = '/notice';
-            let search = $('#noticeSearch').val();
-            if ( search.length != 0 && search.length < 2){
-                alert('검색은 2글자 이상입력하여주세요');
-                $('#noticeSearch').focus();
-                return ;
-            }
-            let params = {
-                "search" : search
-            }
-            post(href, params  , 'get');
-
-        });
-
-        $('#noticeSearch').keypress(function(e){
-            if ( e.keyCode && e.keyCode == 13) {
-                $('#SearchBtn').trigger('click');
-                return false;
-            }
-        })
-
-        $(document).on('click', '#js-btn-wrap_notice', function(){
-            let search = $('#noticeSearch').val();
-            let page = $('#pages').val();
-            page = parseInt(page);
-            let param = {
-                search : search,
-                page : page+1,
-            };
-            $.ajax({
-                type : 'post',
-                url : "/notice/proc/moreList",
-                async : true,
-                dataType : 'json',
-                data : param,
-                beforeSend : function(){
-                    loadingShowHide();
-                },
-                success : function(response)  {
-                    loadingShowHide();
-                    $("#noticeLoad").append(response.html);
-                    $('#pages').val(response.page);
-                    console.log(response.total_page)
-                    console.log(response.page)
-                    if ( response.total_page < response.page) $('#js-btn-wrap_notice').hide();
-                },
-                error : function(request, status, error){
-                    console.log(error);
-                }
-            })
-        })
-
-        // 상세 보기 
-
-        $(document).on('click', 'div.list > a', function(e){
-            e.preventDefault();
-            let href = $(this).prop('href');
-            loadingShowHide();
-            $.get( href , function(data , status){
-                
-                $('#viewList').hide();
-                $('#viewDetail').html(data);
-                $('#viewDetail').show();
-                loadingShowHide();
-                // $('.sub_inner_detail').html(data);
-                // console.log(data);
-            })
-
-        })
-
-        $(document).on('click', '.top_back' , function(e){
-            e.preventDefault();
-            $('#viewDetail').empty().hide();
-            $('#viewList').show();
-        })
     });
+
+    $('#noticeSearch').keypress(function(e){
+        if ( e.keyCode && e.keyCode == 13) {
+            $('#SearchBtn').trigger('click');
+            return false;
+        }
+    })
+
+    $(document).on('click', '#js-btn-wrap_notice', function(){
+        let search = $('#noticeSearch').val();
+        let page = $('#pages').val();
+        page = parseInt(page);
+        let param = { search : search, page : page+1 };
+        $.ajax({
+            type : 'post',
+            url : "/notice/proc/moreList",
+            async : true,
+            dataType : 'json',
+            data : param,
+            beforeSend : function(){
+                loadingShowHide();
+            },
+            success : function(response)  {
+                loadingShowHide();
+                $("#noticeLoad").append(response.html);
+                $('#pages').val(response.page);
+                console.log(response.total_page)
+                console.log(response.page)
+                if ( response.total_page < response.page) $('#js-btn-wrap_notice').hide();
+            },
+            error : function(request, status, error){
+                console.log(error);
+            }
+        })
+    })
+
+    // 상세 보기 
+
+    $(document).on('click', 'div.list > a', function(e){
+        e.preventDefault();
+        let href = $(this).prop('href');
+        loadingShowHide();
+        $.get( href , function(data , status){
+            
+            $('#viewList').hide();
+            $('#viewDetail').html(data);
+            $('#viewDetail').show();
+            loadingShowHide();
+            // $('.sub_inner_detail').html(data);
+            // console.log(data);
+        })
+
+    })
+
+    $(document).on('click', '.top_back' , function(e){
+        e.preventDefault();
+        $('#viewDetail').empty().hide();
+        $('#viewList').show();
+    })
+
+    // writer
+    $(document).on('click', '.request_writer', function(e){
+        e.preventDefault();
+        let href = $(this).prop('href');
+        // loadingShowHide();
+
+    })
+
+});
 
 </script>   

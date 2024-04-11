@@ -30,6 +30,9 @@ class Notice extends BaseController
     public function __construct()
     {
 
+        var_dump($_POST);
+
+        die();
         $session = session();
         if (! $session->has('user_id') ){
             $this->getUserAuth();
@@ -103,18 +106,6 @@ class Notice extends BaseController
             return $this->{$this->data['action']}();
         }
     }
-
-    public function getStudentfromclasscd(){
-
-        $params = [
-                'class_cd' => $this->data['class_cd']
-        ];
-
-        $students = new \App\Models\Students();
-        $student_list = $students->getStudentfromClass($params);  // 학원 리스트
-
-        echo json_encode( $student_list );
-    }
     public function getlists(){
 
         $params = [
@@ -142,6 +133,18 @@ class Notice extends BaseController
         return json_encode( $data );
         die();
         // return 
+    }
+
+    public function getStudentfromclasscd(){
+
+        $params = [
+                'class_cd' => $this->data['class_cd']
+        ];
+
+        $students = new \App\Models\Students();
+        $student_list = $students->getStudentfromClass($params);  // 학원 리스트
+
+        echo json_encode( $student_list );
     }
 
     public function detail($noti_seq){
@@ -222,8 +225,10 @@ class Notice extends BaseController
     }
 
     public function write(){
+        
         $data = [
             'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
+            'class_list' => $this->class_list,
         ];
         return $this->template('notice/write', $data , 'sub');
     }
