@@ -30,11 +30,10 @@ class Notice extends BaseController
     public function __construct()
     {
 
-        var_dump($_POST);
         $session = session();
-        // if (! $session->has('user_id') ){
-        //     $this->getUserAuth();
-        // } 
+        if (! $session->has('user_id')  ){
+            $this->getUserAuth();
+        } 
         $this->getUserAuth();
         $this->is_teacher = $session->get('is_teacher');
         $this->year = $session->get('year');
