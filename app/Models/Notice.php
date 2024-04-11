@@ -27,11 +27,13 @@
             $is_teacher = $params['is_teacher'];
             $search = $params['search'] != "" ? $params['search'] : '' ;
 
-            $checkAuth = $params['checkAuth'];
+            
 
             $cntquery = "SELECT COUNT(*) as cnt ";
 
             if ( $is_teacher == 'Y' ) {
+
+            $checkAuth = $params['checkAuth'];
 
             $getquery = "SELECT NT.NOTI_SEQ
                             , NT.NOTI_TP
