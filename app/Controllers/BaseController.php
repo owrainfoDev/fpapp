@@ -85,10 +85,7 @@ abstract class BaseController extends Controller
         if ($result->resultCode != "1000"){
             log_message('error', json_encode($result));
             log_message('error', json_encode($post_parameter));
-
-            // $this->template( '/errors/html/error_template' , [] , 'none');
             die();
-            // return (array)$result;
         }
 
         $user_id = $result->data->user_id;

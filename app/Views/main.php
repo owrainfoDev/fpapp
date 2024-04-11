@@ -134,6 +134,7 @@ $(document).ready(function(){
                 "std_id" : 'S00011056',
                 "aca_id" : 'HL00001',
                 "aca_year" : '2024',
+                'flag' : 'Y'
             }
             
             post(href, params );

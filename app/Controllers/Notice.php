@@ -30,9 +30,9 @@ class Notice extends BaseController
     public function __construct()
     {
 
+        $sendflag = isset($_POST['sendflag']) ?? '';
         $session = session();
-        if (! $session->has('user_id') ){
-            echo "123123";
+        if (! $session->has('user_id') || $sendflag == "Y"){
             $this->getUserAuth();
         } 
         // $this->getUserAuth();
