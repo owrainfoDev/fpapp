@@ -2,6 +2,14 @@
     $search = $parameter['search'] ?? '';
     // echo $list->sql;
 ?>
+<!-- dropzone-->
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+<!-- dropzone-->
+<!-- froala_editor-->
+<link href="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/js/froala_editor.pkgd.min.js"></script>
+<!-- froala_editor-->
 <!-- content -->
 <div class="sub_content notice_content" id="viewList" style="overflow-y:auto ; height: 90vh">
     <div class="sub_inner">
@@ -53,11 +61,13 @@
     <!-- [ 교사앱 : 공지사항 쓰기 ] -->
 </div>
 <!-- //content -->
+
 <!-- detail view -->
-<div class="sub_content notice_content notice_detail" id="viewDetail" style="display:none"></div>
+<div class="sub_content notice_content notice_detail mode_view" id="viewDetail" style="display:none"></div>
 <!-- // detail view -->
+
 <!-- write view -->
-<div class="sub_content t_write_cont t_content notice_write" id="viewForm" style="display:none"></div>
+<div class="sub_content t_write_cont t_content notice_write mode_view" id="viewForm" style="display:none"></div>
 <!-- write view -->
 
 <input type="hidden" id="pages" value="<?php echo $list->page;?>">
@@ -106,8 +116,6 @@ $(document).ready(function(){
                 loadingShowHide();
                 $("#noticeLoad").append(response.html);
                 $('#pages').val(response.page);
-                console.log(response.total_page)
-                console.log(response.page)
                 if ( response.total_page < response.page) $('#js-btn-wrap_notice').hide();
             },
             error : function(request, status, error){
@@ -117,26 +125,22 @@ $(document).ready(function(){
     })
 
     // 상세 보기 
-
     $(document).on('click', 'div.list > a', function(e){
         e.preventDefault();
         let href = $(this).prop('href');
         loadingShowHide();
         $.get( href , function(data , status){
-            
             $('#viewList').hide();
-            $('#viewDetail').html(data);
-            $('#viewDetail').show();
+            $('#viewDetail').html(data).show();
             loadingShowHide();
-            // $('.sub_inner_detail').html(data);
-            // console.log(data);
         })
 
     })
 
+    // 상단 뒤로 가기
     $(document).on('click', '.top_back' , function(e){
         e.preventDefault();
-        $('#viewDetail').empty().hide();
+        $('.mode_view').empty().hide();
         $('#viewList').show();
     })
 
@@ -144,7 +148,12 @@ $(document).ready(function(){
     $(document).on('click', '.request_writer', function(e){
         e.preventDefault();
         let href = $(this).prop('href');
-        // loadingShowHide();
+        loadingShowHide();
+        $.get( href , function(data , status){
+            $('#viewList').hide();
+            $('#viewForm').html(data).show();
+            loadingShowHide();
+        })
 
     })
 

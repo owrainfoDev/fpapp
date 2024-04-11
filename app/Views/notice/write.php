@@ -1,8 +1,6 @@
 
 
-<!-- //content -->
-<link href="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/js/froala_editor.pkgd.min.js"></script>
+
 
 <div class="sub_content t_write_cont t_content notice_write">
     <div class="sub_inner">
@@ -59,7 +57,7 @@
                 <button type="button" class="send right">보내기</button>
             </div>
             <!-- [ 교사앱 : 모달 ]  -->
-            <!-- <div class="modal">
+            <div class="modal">
                 <div class="cont">
                     <p>등록하시겠습니까?</p>
                     <div class="btn">
@@ -67,39 +65,12 @@
                         <button type="submit" class="confirm" id="submit-dropzone">확인</button>
                     </div>
                 </div>
-            </div> -->
+            </div>
         </form>
     </div>
 </div>
 
 <script type="text/javascript">
-
-
-
-
-
-// function getStudentList(class_cd){
-
-    
-
-//     content_data.action = 'getStudentfromclasscd';
-//     content_data.class_cd = class_cd;
-//     fetch("/api/notice", {
-//                 method: "POST",
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//                 body: JSON.stringify(content_data),
-//             })
-//     .then((response) => response.json())
-//     .then((data) => {
-//         var template = _.template($('#stdListTtemplate').html());
-//         var result = template( { studentList: data } );
-//         $("#stdList").html( result );
-//     });
-// }
-
-
 
 $(document).ready(function(){
     // 반선택
@@ -247,10 +218,6 @@ $(document).ready(function(){
         jQuery(".modal-back").remove();
     });
 
-    
-
-    
-
     $(document).ready(function(){
 
         $(document).on('click', '#tempsave' , function(){
@@ -270,7 +237,7 @@ $(document).ready(function(){
                             sessionStorage.removeItem('noteTxt');
                             return ;
                         } else {
-                            sessionStorage.setItem('tempsave', '<?php echo CURRENT_PAGE_NAME ?>');
+                            sessionStorage.setItem('tempsave', '<?php echo uri_string() ?>');
                             sessionStorage.setItem('noteTitle', $('#noteTitle').val());
                             sessionStorage.setItem('noteTxt', $('#noteTxt').val());
                         }
@@ -283,7 +250,7 @@ $(document).ready(function(){
                 
         } else {
 
-            if ( sessionStorage.getItem('tempsave') == '<?php echo CURRENT_PAGE_NAME ?>'){
+            if ( sessionStorage.getItem('tempsave') == '<?php echo uri_string() ?>'){
                 Swal.fire({ 
                     text : "임시저장 내용을 불러옵니다. " , icon: "info",
                     showCancelButton: true,

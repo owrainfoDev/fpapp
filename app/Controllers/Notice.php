@@ -30,9 +30,6 @@ class Notice extends BaseController
     public function __construct()
     {
 
-        var_dump($_POST);
-
-        die();
         $session = session();
         if (! $session->has('user_id') ){
             $this->getUserAuth();
@@ -230,7 +227,7 @@ class Notice extends BaseController
             'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
             'class_list' => $this->class_list,
         ];
-        return $this->template('notice/write', $data , 'sub');
+        return $this->template('notice/write', $data , 'none');
     }
 
     public function getwrite(){
