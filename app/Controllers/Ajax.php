@@ -24,12 +24,11 @@ class Ajax extends BaseController
     public function __construct()
     {
         $session = session();
-        $this->user_id = $session->get('_user_id');
+        $this->user_id = $session->get('user_id');
         $this->authinfo = new \App\Models\AuthorInfo($this->user_id);
-        $this->userinfo = $this->authinfo->info();
-        $this->is_teacher = $this->authinfo->is_teacher();
-        $this->year = $session->get("year");
-
+        $this->is_teacher = $session->get('is_teacher');
+        $this->year = $session->get('year');
+        
         $this->tempsavemodel = new \App\Models\TempSave();
     }
 

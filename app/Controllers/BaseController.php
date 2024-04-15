@@ -85,7 +85,16 @@ abstract class BaseController extends Controller
         if ($result->resultCode != "1000"){
             log_message('error', json_encode($result));
             log_message('error', json_encode($post_parameter));
+
+            $data = [
+                'msg' => '로그인 정보가 잘못되었습니다.',
+                'result' => $result
+            ];
+
+
+            $this->template( '/errors/html/error_template' , $data , 'none');
             die();
+            // return (array)$result;
         }
 
         $user_id = $result->data->user_id;
@@ -119,7 +128,10 @@ abstract class BaseController extends Controller
             'year' => $aca_year,
             'class_list' => $class_list
         ];
-        if ( $is_teacher !== true ) $session_data['std_id'] = $std_id;
+        if ( $is_teacher !== true ) {
+            $session_data['std_id'] = $std_id;
+            $session->remove('checkAuth');
+        }
         else {
             $teacher = new \App\Models\Teacher();
             if ( $teacher->teacherAuthYn($user_id) > 0 ) $session_data['checkAuth'] = 'N' ;  // 행정 여부 

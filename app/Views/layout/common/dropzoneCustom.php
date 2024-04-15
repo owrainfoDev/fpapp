@@ -71,6 +71,8 @@ label.error
 
 <script>
     // disable autodiscover
+
+    var dropzonefiles;
     
     Dropzone.autoDiscover = false;
     var pcnt = 0;
@@ -253,7 +255,7 @@ label.error
         console.log('--성공--')
         // console.log(response);
         // $('#file').val(JSON.stringify(response));
-        content_data.files = response;
+        dropzonefiles = response;
         // console.log('--성공--')
         // submit the form after images upload
         // (if u want yo submit rest of the inputs in the form)
@@ -276,7 +278,7 @@ label.error
        
         if ( typeof _maxfiles !== "undefined" && _maxfiles == 1 ) {
             // console.log('성공11');
-            content_data.files = response;
+            dropzonefiles = response;
             goSubmit();
         }
     })

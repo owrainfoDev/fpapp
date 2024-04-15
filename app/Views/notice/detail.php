@@ -66,7 +66,9 @@
     </div>
         </div>
         <!-- [ 교사앱 : 교사앱에서만 보이기 - 알림장 수정/삭제 ] -->
-        <?php if ($detail->USER_ID == $session->get('_user_id') ) :?>
+        
+        <?php // if ($detail->USER_ID == $session->get('user_id') ) :?>
+        <?php if ( $is_teacher && ( ( $session->get('checkAuth') == "Y" && $detail->USER_ID == $session->get('user_id') ) || $session->get('checkAuth') == "N" )  ) : ?>
         <div class="btn_box" style="margin-top: auto; " id="btn_box">
             <button type="button" class="edit left" onclick="goEdit();">수정</button>
             <button type="button" class="del right" onclick="goDelete();">삭제</button>

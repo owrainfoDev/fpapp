@@ -177,7 +177,8 @@ class Notice extends BaseController
                 'detail' => $detail,
                 'file' => $f
             ],
-            'noti_seq' => $noti_seq
+            'noti_seq' => $noti_seq,
+            'is_teacher' => $this->is_teacher
         ];
         ob_start();
         $this->template('notice/detail', $data , 'none');
@@ -226,8 +227,11 @@ class Notice extends BaseController
     public function write(){
         
         $data = [
-            'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
-            'class_list' => $this->class_list,
+            'header'        => ['title'=> $this->pagename , 'pn' => $this->pn],
+            'class_list'    => $this->class_list,
+            'aca_id'        => $this->aca_id,
+            'user_id'       => $this->user_id,
+            'is_teacher'    => $this->is_teacher
         ];
         return $this->template('notice/write', $data , 'none');
     }
@@ -318,6 +322,7 @@ class Notice extends BaseController
                         'FILE_EXT' => $file['FILE_EXT'],
                         'ENT_DTTM' => date("Y-m-d H:i:s"),
                         'ORIGIN_FILE_NM' => $file['ORIGIN_FILE_NM'],
+                        'FILE_URL' => $file['FILE_PATH'] . $file['FILE_NM'] .".". $file['FILE_EXT'],
                         'FILE_SIZE' => $file['FILE_SIZE']
                     ];
                     if ( $thumbnail = mp4tojpg( $file['FILE_PATH'] , $file['FILE_NM'] , $file['FILE_EXT'] ) ) {

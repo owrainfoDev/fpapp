@@ -1,10 +1,7 @@
-<?php 
-    $search = $parameter['search'] ?? '';
-    // echo $list->sql;
-?>
+<?php $search = $parameter['search'] ?? ''; ?>
 <!-- dropzone-->
-<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+<script src="/resources/dropzone/dropzone.min.js"></script>
+<link rel="stylesheet" href="/resources/dropzone/dropzone.min.css" type="text/css" />
 <!-- dropzone-->
 <!-- froala_editor-->
 <link href="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
@@ -140,6 +137,9 @@ $(document).ready(function(){
     // 상단 뒤로 가기
     $(document).on('click', '.top_back' , function(e){
         e.preventDefault();
+        if ( $('#viewList').css('display') == "block" ) {
+            console.log( '--- 홈화면 ---' );
+        }
         $('.mode_view').empty().hide();
         $('#viewList').show();
     })

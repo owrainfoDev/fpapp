@@ -123,7 +123,7 @@ $routes->set404Override('App\Errors::show404');
 // Will display a custom view
 $routes->set404Override(function()
 {
-    echo view('errors/html/error_template');
+    echo view('errors/html/error_404');
 });
 
 // api 호출 이동

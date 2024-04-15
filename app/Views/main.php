@@ -123,7 +123,7 @@ $(document).ready(function(){
     $(document).on('click', 'div.menu_cont > span[href]' , function(e){
         e.preventDefault();
 
-        var token = '5GVs4381FJ20Cxysysy7Yy5zwTQuATwOjT+yGj0IN5cK3yk3KBlLDiR4xXJX2Jl8lA3CbOlZdozY2GWLqiqCxCV2MouaTdrXzYBl9/4cId0+aEHFenUid0N5i4R2Cufoh8Z7V0nlPPUr6XcIEIOX5TTFtyDwSvKRHjrel9fPSbbHMQWl9NwMAcG6SC2KlV9Cx+C+2+yxHo9zMc8iqoTMZ3zblYIgSnLi77K+4TC3HFda+lpMwWGo3bxo2rQl5V3/';
+        var token = '5GVs4381FJ20Cxysysy7Yy5zwTQuATwOjT+yGj0IN5cK3yk3KBlLDiR4xXJX2Jl8lA3CbOlZdozY2GWLqiqCxLgPETAo+ADYgb9MFiemr9U32kBdDddTDzn2pjFozVrnWUjAC5Bq2KZ8zsrGyqvfZejvHa3Sz/E0hesieGgRgwCT4BvLHcrCAJpzPHpYvoOOoBYuseKJcRFRT5WLR2LxQiZHRwuvKDdtyMmkTaUTiwxHaJw5rvkk8s2SIXzCF+u5';
         
         var href = $(this).attr('href');
 
@@ -131,7 +131,7 @@ $(document).ready(function(){
 
             let params = {
                 "token" : token,
-                "std_id" : 'S00011056',
+                // "std_id" : 'S00011056',
                 "aca_id" : 'HL00001',
                 "aca_year" : '2024',
                 'flag' : 'Y'
