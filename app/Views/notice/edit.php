@@ -1,177 +1,14 @@
 <?php
-    $detail = $data['detail']['data'];
-    $files = $data['file'];
+    $content = $data['detail']['data'];
     $read = $data['detail']['read'];
-    $noti_seq = $data['noti_seq'];
+    $current_class_cd = json_decode( $data['current_students'] );
 
-    
-    $editfile = array_merge(
-            isset($data['file']['image']) ? $data['file']['image'] : [],
-            isset($data['file']['file']) ? $data['file']['file'] : []
-    );
-
-    $title_photo = null;
-    $photos = array();
-    if ( isset( $files['image'] ) ) {
-        $title_photo = $files['image'][0]->FILE_PATH . "/" . $files['image'][0]->FILE_NM . "." . $files['image'][0]->FILE_EXT;
-
-        $photos = [];
-        foreach ($files['image'] as $file){
-            $photos[] = [
-                'link' => $file->FILE_PATH . "/" . $file->FILE_NM . "." . $file->FILE_EXT,
-                'orgfilename' => $file->ORIGIN_FILE_NM,
-                'size' => $file->FILE_SIZE,
-                'file_seq' => $file->APND_FILE_SEQ
-            ];
-        }
-    }
-
-    $editfiles = [];
-    if (isset($editfile) ){
-        foreach ($editfile as $file){
-            $filepath = WRITEPATH . $file->FILE_PATH . "/" . $file->FILE_NM . "." . $file->FILE_EXT;
-            $filepath = str_replace('//','/',$filepath);
-            $thumbnail = getThumbnailPreview($filepath);
-            $editfiles[] = [
-                'link' => $file->FILE_PATH . "/" . $file->FILE_NM . "." . $file->FILE_EXT,
-                'orgfilename' => $file->ORIGIN_FILE_NM,
-                'size' => $file->FILE_SIZE,
-                'file_seq' => $file->APND_FILE_SEQ,
-                'thumbnail' => $thumbnail
-            ];
-        }
-    }
-
-    $ii = $data['file']['image'] ;
-    $i1 = 0;
-    $i2 = 0;
-    if (! empty($ii)) {
-  
-        foreach ( $ii as $is){
-            if ( in_array( $is->FILE_EXT ,array( 'jpg', 'jpeg' , 'gif' , 'png' , 'bmp' , 'webp' ) ) ) $i1++;
-            if ( in_array( $is->FILE_EXT ,array( 'mp4' ) ) ) $i2++;
-        }
+    $current_std_id = [];
+    foreach ( $read as $r ){
+        $current_std_id[] = $r->STD_ID;
     }
 
 ?>
-
-<link href="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/js/froala_editor.pkgd.min.js"></script>
-
-<script type="text/javascript">
-function LoadContentTemplate(){
-    content_data.action = 'getwrite';
-    content_data.noti_seq = '';
-    content_data.year = '2023';
-    console.log(JSON.stringify(content_data));
-    fetch("/api/notice", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(content_data),
-            })
-    .then((response) => response.json())
-    .then((data) => {
-        // console.log(JSON.stringify(data));
-        var template = _.template($('#selclassTemplate').html());
-        var result = template( { classList: data.classList } );
-        $("#selclass").html( result );
-        return data;
-    }).then(data => {
-    
-    <?php if ( $detail->CLASS_CD ) : ?>
-        
-        $('#selctClass').val('<?php echo $detail->CLASS_CD; ?>')
-        $('#selctClass').trigger('change');
-        // getStudentList('<?php echo $detail->CLASS_CD; ?>');
-    <?php endif; ?>
-    });
-}
-function getStudentList(class_cd){
-    content_data.action = 'getStudentfromclasscd';
-    content_data.class_cd = class_cd;
-    fetch("/api/notice", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(content_data),
-            })
-    .then((response) => response.json())
-    .then((data) => {
-        var template = _.template($('#stdListTtemplate').html());
-        var result = template( { studentList: data } );
-        $("#stdList").html( result );
-        return data;
-    }).then(data => {
-        <?php foreach( $read as $r ) : ?>
-            $('#STD_ID<?php echo $r->STD_ID; ?>').prop('checked' , true);
-        <?php endforeach ;?>
-        if ( $("input[name*=STD_ID]").length == $("input[name*=STD_ID]:checked").length ) {
-            $('#classNotice').prop('checked', true);
-        } else {
-            $('#classNotice').prop('checked', false);
-        }
-    });
-}
-
-$(document).ready(function(){
-    
-    $(document).on('change' , '#selctClass', function(){
-        var class_cd = $(this).val() ;
-        getStudentList(class_cd);
-    });
-
-    $(document).on('click' , '#classNotice' , function(){
-        
-        if ( $('#classNotice').prop('checked')){
-            $("input[name*=STD_ID]").prop('checked' , true);
-        } else {
-            $("input[name*=STD_ID]").prop('checked' , false);
-        }
-    });
-
-    $(document).on('click' , "input[name*=STD_ID]" , function(){
-            console.log( $("input[name*=STD_ID]").length )
-            console.log( $("input[name*=STD_ID]:checked").length )
-        if ( $("input[name*=STD_ID]").length == $("input[name*=STD_ID]:checked").length ) {
-            $('#classNotice').prop('checked', true);
-        } else {
-            $('#classNotice').prop('checked', false);
-        }
-    })
-
-    
-});
-</script>
-<!-- 선생님이 맡은 반 -->
-<script type="text/template" id="selclassTemplate">
-    <select name="selctClass" id="selctClass" disabled>
-    <option value="선택">선택</option>
-<% _.each(classList,function(item,key,list) { %>
-    <option value="<%= item.CLASS_CD %>"><%= item.CLASS_NM %></option>
-<% }) %>
-    </select>
-</script>
-<script type="text/template" id="stdListTtemplate">
-<div class="class_name write_list_name">
-    <!-- 반별 리스트 -->
-    <% _.each(studentList , function( item , key, list ) { %>
-    <div class="name_list">
-        <input type="checkbox" name="STD_ID" id="STD_ID<%= item.STD_ID %>" value="<%= item.STD_ID %>" class="_std_id" disabled>
-        <label for="STD_ID<%= item.STD_ID %>"></label>
-        <span><%= item.STD_NM %></span>
-    </div>
-    <% }) %>
-    <% if (studentList.length < 1 ) {%>
-        <span>선택된 학생이 없습니다.</span>
-    <% } %>
-</div>
-</script>
-<!-- //content -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
 <div class="sub_content t_write_cont t_content notice_write">
     <div class="sub_inner">
         <form action="/api/notice" id="fileupload" method="POST" enctype="multipart/form-data">
@@ -179,46 +16,45 @@ $(document).ready(function(){
             <input type="hidden" id="file" name="file" value="">
             <div class="form_cont">
                 <div class="class" id="selclass">
-
+                    <!-- 선생님이 맡은 반 -->
+                    <select name="selctClass" id="selctClass">
+                        <option value="선택">선택</option>
+                        <?php foreach ( $class_list as $class ) :?>
+                            <option value="<?php echo $class->CLASS_CD;?>" <?php echo $class->CLASS_CD == $content->CLASS_CD ? "selected" : "" ;?>><?php echo $class->CLASS_NM;?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="all">
                     <span>전체</span>
-                    <input type="checkbox" name="classNotice" id="classNotice" disabled>
+                    <input type="checkbox" name="classNotice" id="classNotice">
                     <label for="classNotice"></label>
                 </div>
                 <div class="class_list write_list" id="stdList">
-                    
+                    <div class="class_name write_list_name">
+                    <?php foreach ( $current_class_cd as $student ) : ?>
+                        <div class="name_list">
+                            <input type="checkbox" name="STD_ID" id="STD_ID<?php echo $student->STD_ID;?>" value="<?php echo $student->STD_ID;?>" class="_std_id" <?php echo in_array($student->STD_ID , $current_std_id) ? "checked" : ""; ?>>
+                            <label for="STD_ID<?php echo $student->STD_ID;?>"></label>
+                            <span><?php echo $student->STD_NM;?></span>
+                        </div>
+                    <?php endforeach ;?>
+                    </div>
                 </div>
             </div>
             <div class="note_txt">
-                <input type="text" name="noteTitle" id="noteTitle" placeholder="제목을 입력해주세요." required value="<?php echo $detail->TITLE ;?>">
+                <input type="text" name="noteTitle" id="noteTitle" value="<?php echo $content->TITLE;?>" placeholder="제목을 입력해주세요." required>
                 <div class="txt_box">
-                    <?php 
-                        $content = $detail->CNTS;
-                        $content = str_replace("<br />" , "\r\n" , $content);
-                    ?>
-
-                    <textarea id="noteTxt" name="noteTxt"><?php echo $detail->CNTS;?></textarea>
-                    
+                    <textarea name="noteTxt" id="noteTxt" placeholder="내용을 입력해 주세요." required><?php echo $content->CNTS;?></textarea>
                 </div>
             </div>
 
-            <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
-            <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+            
 
             <div class="form_file">
                 <span class="title">파일첨부</span>
-                <!-- <input type="file" name="files[]" id="form_img" accept="image/*" multiple>
-                <!-- <span class="place">Image</span> ->
-                <div class="form-img-remove del_img" onClick=""><i></i></div>
-                <div class="form-img-section" style="display: none;">
-                    <img class="form-img-preview" src="#" />
-                </div> -->
-               
-                
                 <!-- [ 카메라 앱으로 이동? ] -->
                 <div class="camera">
-                    <span id="phocnt" style="margin-right:5px">사진<?php echo $i1;?></span><span id="vidcnt" style="margin-right:5px">동영상<?php echo $i2;?></span>
+                <span id="phocnt" style="margin-right:5px">사진0</span><span id="vidcnt" style="margin-right:5px">동영상0</span>
                     <i class="icon_image"></i>
                 </div>
                 
@@ -231,104 +67,13 @@ $(document).ready(function(){
             </div>
 
             <div class="btn_box" style="margin-top: 30px;">
-                <!-- <button type="button" class="save left" id="tempsave">임시저장</button> -->
-                <button type="button" class="send right" id="editBtn">수정</button>
+                <button type="button" id="cancleDetail">취소</button>
+                <button type="button" class="send right">수정</button>
             </div>
-            
+
         </form>
     </div>
 </div>
-
-
-<style>
-label.error
-{
-    color:red;
-    font-family:verdana, Helvetica;
-    font-size:11px;
-}
-/* textarea.error input.error { border-color: red;} */
-.dropzone{
-	border:none;
-	display:flex;
-	flex-wrap:wrap;
-	margin-top:10px;
-}
-
-.dropzone.dz-clickable{
-	min-height: auto;
-    	margin: 0;
-    	display: flex;
-}
-
-.dropzone .dz-preview{
-	margin:0;
-	min-height:auto;
-}
-
-.dropzone .dz-preview .dz-progress{
-	display:none;
-
-}
-
-.dropzone .dz-preview .dz-details{
-	display:none;
-}
-
-.dropzone .dz-preview .dz-image{
-	border-radius:0;
-	width:50px;
-	height:40px;
-	margin: 0 10px;
-}
-
-.dropzone .dz-preview .dz-image img{
-	width:100%;
-}
-
-.dropzone .dz-preview .dz-remove{
-	font-size:0;
-	position: absolute;
-    	bottom: 0;
-    	z-index: 11;
-    	right: 0px;
-	background:url(/resources/images/icon/icon_colse_img.png) no-repeat center / 100%;
-	width: 15px;
-    	height: 15px;
-}
-.dropzone .dz-preview .dz-image img {
-    border: 1px solid #EDEDED;
-    margin: 2px;
-    border-radius: 15%;
-}
-
-.dropzone .dz-preview .dz-error-mark{
-    display:none;
-}
-</style>
-
-<script>
-$(function () {
-    var editor = new FroalaEditor("#noteTxt", {
-	        'key': '5OA4gF4D3I3G3B6C4D-13TMIBDIa2NTMNZFFPFZe2a1Id1f1I1fA8D6C4F4G3H3I2A18A15A6=='
-	        ,'height': 290
-	        // , imageUploadParam: 'uploadImg'
-
-	        // // Set the image upload URL.
-	        // , imageUploadURL: '/app/manage/noticeMng/editorImgUpload'
-	        // // Additional upload params.
-	        // , imageUploadParams: {id: 'contents'}
-	        // // Set request type.
-	        // , imageUploadMethod: 'POST'
-	        // // Set max image size to 5MB.
-	        // , imageMaxSize: 20 * 1024 * 1024
-	        // // Allow to upload PNG and JPG.
-	        // , imageAllowedTypes: ['jpeg', 'jpg', 'png']
-		});
-
-});
-
-</script>
 
 <script>
     // dropzone Setting
@@ -336,174 +81,57 @@ $(function () {
     // var _uploadMultiple = false;
     // var _parallelUploads = 1;
 </script>
+<?php echo $this->include('./layout/common/dropzoneCustom');?>
 
+<?php 
 
-<script>
-    function getFileExtension(fileName){
-        return fileName.split('.').pop();
-    };
-    var pcnt = <?php echo $i1;?>;
-    var vcnt = <?php echo $i2;?>;
-    // disable autodiscover
-    // https://gist.github.com/kreativan/83febc214d923eea34cc6f557e89f26c
-    Dropzone.autoDiscover = false;
+    $files = array_merge(
+        isset($data['file']['image']) ? $data['file']['image'] : [],
+        isset($data['file']['file']) ? $data['file']['file'] : []
+    );
 
-    var myDropzone = new Dropzone("#dropzone", {
-        url: "/fileupload",
-        method: "POST",
-        paramName: "file",
-        autoProcessQueue : false,
-        acceptedFiles: "image/*",
-        maxFiles: typeof _maxfiles !== "undefined" ? _maxfiles : 30,
-        maxFilesize: 30, // MB
-        uploadMultiple: typeof _uploadMultiple !== "undefined" ? _uploadMultiple : true,
-        parallelUploads: typeof _parallelUploads !== "undefined" ? _parallelUploads : 100 , // use it with uploadMultiple
-        createImageThumbnails: true,
-        thumbnailWidth: typeof _thumbnailWidth !== "undefined" ? _thumbnailWidth : 50 , // use it with uploadMultiple 
-        thumbnailHeight: typeof _thumbnailHeight !== "undefined" ? _thumbnailHeight : 40 , // use it with uploadMultiple 
-        addRemoveLinks: true,
-        timeout: 180000,
-        dictRemoveFileConfirmation: "삭제하시겠습니까?", // ask before removing file
-        // acceptedFiles : "image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.tsv,.ppt,.pptx,.pages,.odt,.rtf,.zip,.tar",
-        acceptedFiles : ".jpeg,.jpg,.png,.gif,.JPEG,.JPG,.PNG,.GIF,.MP4,.mp4,.pdf",
-        // Language Strings
-        // dictFileTooBig: "File is to big ({{filesize}}mb). Max allowed file size is {{maxFilesize}}mb",
-        dictFileTooBig: "파일 크기가 너무 큽니다({{filesize}}mb). 최대 허용 파일 크기는 {{maxFilesize}}mb입니다.",
-        dictInvalidFileType: "업로드 가능한 파일이 아닙니다.",
-        dictCancelUpload: "취소",
-        dictRemoveFile: "삭제",
-        dictMaxFilesExceeded: "{{maxFiles}}개 파일까지 업로드 가능합니다.",
-        dictDefaultMessage: " ",
-    });
-    myDropzone.on("addedfile", function(file) {
-        // console.log('--추가--')
-        // console.log(file);
-        if (file.url){
-            
-        } else {
-            
-            let ext = getFileExtension(file.upload.filename);
-            let accept_ext = this.options.acceptedFiles;
-            
-            let pos = accept_ext.indexOf(ext);
-            
-            if ( pos < 0 ){
-                Swal.fire({ text : "해당파일은 업로드 하실 수 없습니다." , icon: "question" });
-                this.removeFile(file);        
-            } else {
+    $photos = [];
+    if ( isset( $files ) ) {
+        
+        foreach ($files as $file){
+
+            if ( $file->FILE_URL == '' ||  ! file_exists( substr(WRITEPATH , 0 , -1) . $file->FILE_URL) ) {
+                $filepath = $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT;
+                $filepath =  str_replace( _ROOT_PATH , '' , $filepath ) ;
                 
-                let videoext = '.mp4,.MP4';
-                if (videoext.indexOf(ext) > 0){
-                    vcnt++;
-                    if ( document.getElementById('vidcnt') ) {
-                        document.getElementById('vidcnt').innerHTML = '동영상' + vcnt;
-                    }
-                } else {
-                    pcnt++;
-                    if ( document.getElementById('phocnt') ) {
-                        document.getElementById('phocnt').innerHTML = '사진' + pcnt;
-                    }
-                }
-                
+            }else {
+                $filepath = $file->FILE_URL;
             }
+
+            
+            $filepath = WRITEPATH . $filepath;
+
+            // if (!file_exists($filepath)) continue;
+
+            // $filepath = str_replace('//', '/', $filepath);
+            // $f = new \CodeIgniter\Files\File($filepath);
+            // $type = $f->getMimeType();
+            if ( $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT == "/.") continue;
+
+            $photos[] = [
+                'link' => $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT,
+                'orgfilename' => $file->FILE_ORG_NAME,
+                'size' => $file->FILE_SIZE,
+                'file_seq' => $file->SEQ,
+                'ext' => $file->FILE_EXT,
+                // 'thumbnail' => $file->THUMBNAIL == "Y" ? $file->FILE_PATH . "/" . $file->FILE_NAME . ".jpg" : $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT
+                'thumbnail' => getThumbnailPreview($filepath)
+            ];
         }
-        
-        
-    });
+    }
+?>
 
-    myDropzone.on("removedfile", function(file) {
-
-        if (file.url){
-            
-            
-            fetch("/removeFile", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(file),
-                    })
-            .then((response) => response.json())
-            .then((data) => {
-                
-
-            });
-
-            let ext = getFileExtension(file.url);
-            let videoext = '.mp4,.MP4';
-            if (videoext.indexOf(ext) > 0){
-                vcnt--;
-                if ( document.getElementById('vidcnt') ) {
-                    document.getElementById('vidcnt').innerHTML = '동영상' + vcnt;
-                }
-            } else {
-                pcnt--;
-                if ( document.getElementById('phocnt') ) {
-                document.getElementById('phocnt').innerHTML = '사진' + pcnt;
-                }
-            }
-
-        } else {
-            let ext = getFileExtension(file.upload.filename);
-            let videoext = '.mp4,.MP4';
-            if (videoext.indexOf(ext) > 0){
-                vcnt--;
-                if ( document.getElementById('vidcnt') ) {
-                    document.getElementById('vidcnt').innerHTML = '동영상' + vcnt;
-                }
-            } else {
-                pcnt--;
-                if ( document.getElementById('phocnt') ) {
-                document.getElementById('phocnt').innerHTML = '사진' + pcnt;
-                }
-            }
-        }
-
-    });
-
-    // Add mmore data to send along with the file as POST data. (optional)
-    myDropzone.on("sending", function(file, xhr, formData) {
-        // console.log('--전송--')
-        // formData.append("dropzone", "1"); // $_POST["dropzone"]
-        // console.log('--전송--')
-        formData.append("pn", "<?php echo ( isset($header['pn']) && $header['pn'] == '' ? "common" : $header['pn'] ) ?>"); // $_POST["dropzone"]
-    });
-
-    myDropzone.on("error", function(file, response) {
-        // console.log('--에러--')
-        // console.log(response);
-        // console.log('--에러--')
-    });
-
-    // on success
-    myDropzone.on("successmultiple", function(file, response) {
-        // get response from successful ajax request
-        // console.log('--성공--')
-        // console.log(response);
-        // $('#file').val(JSON.stringify(response));
-        content_data.files = response;
-        // console.log('--성공--')
-        // submit the form after images upload
-        // (if u want yo submit rest of the inputs in the form)
-        checkvalid();
-    });
-
-    myDropzone.on('thumbnail' , function(file, response){
-        // console.log('--썸네일--')
-        // console.log(file)
-        // console.log( response );
-        
-    });
-
-
-
+<script type="text/javascript">
     var images = [
-        <?php foreach($editfiles as $file): ?>
-        {name:"<?php echo $file['orgfilename']?>", url: "<?php echo $file['link']?>", size: "<?php echo $file['size']?>", fileSeq: "<?php echo $file['file_seq'] ?>" , tb:"_NOTI_APND_FILE", thumbnail:"<?php echo $file['thumbnail']?>"},
+        <?php foreach($photos as $file): ?>
+        {name:"<?php echo $file['orgfilename']?>", url: "<?php echo $file['link']?>", size: "<?php echo $file['size']?>", fileSeq: "<?php echo $file['file_seq'] ?>" , tb:"_NOTI_APND_FILE" , thumbnail:"<?php echo $file['thumbnail']?>"},
         <?php endforeach; ?>
     ] 
-
-
 
     for(let i = 0; i < images.length; i++) {
 
@@ -524,103 +152,50 @@ $(function () {
         myDropzone.options.maxFiles = myDropzone.options.maxFiles - existingFileCount;
 
     }
+</script>
 
-    $('#dropzone').contents()[0].textContent = '';
-    // button trigger for processingQueue
-    // var submitDropzone = document.getElementById("submit-dropzone");
-    // submitDropzone.addEventListener("click", function(e) {
-    //     // Make sure that the form isn't actually being sent.
-    //     e.preventDefault();
-    //     e.stopPropagation();
+<style>
+     .t_content .form_file .camera i { margin-bottom: 5px;}
+    .dropzone .dz-preview.dz-image-preview , .dropzone { background-color: #F1F1F5}
+</style>
 
-    //     // if ( checkvalid() ) {
-    //     //     return ;
-    //     // }
+<script>
+    var editor ;
 
-    //     if (myDropzone.files != "") {
-    //         // console.log(myDropzone.files);
-    //         myDropzone.processQueue();
-    //     } else {
-    //     // if no file submit the form    
-    //         $("#fileupload").submit();
-    //     }
+     editor = new FroalaEditor("#noteTxt", {
+	        'key': '5OA4gF4D3I3G3B6C4D-13TMIBDIa2NTMNZFFPFZe2a1Id1f1I1fA8D6C4F4G3H3I2A18A15A6=='
+	        ,'height': 290
+            ,'attribution': false
+	        // , imageUploadParam: 'uploadImg'
 
-    //     return false;
-
-    // });
-
-
+	        // // Set the image upload URL.
+	        // , imageUploadURL: '/app/manage/noticeMng/editorImgUpload'
+	        // // Additional upload params.
+	        // , imageUploadParams: {id: 'contents'}
+	        // // Set request type.
+	        // , imageUploadMethod: 'POST'
+	        // // Set max image size to 5MB.
+	        // , imageMaxSize: 20 * 1024 * 1024
+	        // // Allow to upload PNG and JPG.
+	        // , imageAllowedTypes: ['jpeg', 'jpg', 'png']
+		});
     
-    $("#fileupload").validate({
-        rules: {
-            noteTitle: "required"
-        },
-        messages: {
-            noteTitle: "제목을 입력해 주세요"
-        },
-        submitHandler: function(form) {
-            // return false;
-            Swal.fire({
-                title: "알림장",
-                text: "알림장을 수정하시겠습니까?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "확인",
-                cancelButtonText: "취소",
-            }).then((result) => {
-                if (result.isConfirmed) {
+</script>
 
-                    
+<script type="text/javascript">
+  
 
-                    if (myDropzone.files != "") {
-                        myDropzone.processQueue();
-                    } else {
-                        checkvalid();
-                    }
-                    
-                    // checkvalid();
-                } else {    // 취소
-                    return false;
-                    
-                }
-            });
-
-            // if (myDropzone.files != "") {
-            //     // console.log(myDropzone.files);
-            //     myDropzone.processQueue();
-            // } else {
-            // // if no file submit the form    
-            //     $("#fileupload").submit();
-            // }
-
-            // // console.log(content_data);
-            // checkvalid();
-            return false;
-        }
-    });
-
-    $('#dropzone').contents()[0].textContent = ''
-
-    $(document).on('click', '#editBtn' , function(){
-        $("form#fileupload").submit();
-    });
-    
-
- 
-
-    
-
-    function checkvalid(){
-        
+    function goSubmit(){
         var forms = $('form#fileupload').serializeObject();
         forms.action = 'editProc';
-        forms.USER_ID = content_data.USER_ID;
-        forms.is_teacher = content_data.is_teacher;
-        forms.noti_seq = '<?php echo $noti_seq;?>';
-        forms.files = content_data.files;
-        
+        forms.ACA_ID = '<?php echo $aca_id;?>';
+        forms.USER_ID = '<?php echo $user_id;?>';
+        forms.is_teacher = '<?php echo $is_teacher;?>'
+        forms.files = dropzonefiles;
+        forms.noti_seq = '<?php echo $content->NOTI_SEQ;?>';
+
+        loadingShowHide();
+
         fetch("/api/notice", {
                     method: "POST",
                     headers: {
@@ -630,13 +205,16 @@ $(function () {
                 })
         .then((response) => response.json())
         .then((data) => {
+            loadingShowHide();
             if ( data.status == 'success'){
+                
+                if ( typeof tempSave == "object" )  tempSave.delete(); // 임시 저장 삭제
 
                 const Toast = Swal.mixin({
                     toast: true,
                     position: 'center-center',
                     showConfirmButton: false,
-                    timer: 3000,
+                    timer: 500,
                     timerProgressBar: true,
                     didOpen: (toast) => {
                         toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -648,16 +226,305 @@ $(function () {
                     title: '알림장이 수정 되었습니다.'
                 }).then(function (result) {
                     if (true) {
-                        location.href=data.redirect_to;
+                        location.href="/notice"
                     }
                 });
 
                 
             } else {
-                Swal.fire("등록에 실패하였습니다.");
+                loadingShowHide();
+                Swal.fire("수정에 실패하였습니다.");
                 location.reload();
             }
         });
     }
+</script>
+
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+    // 반선택
+    $(document).on('change' , '#selctClass', function(){
+        let class_cd = $(this).val() ;
+        let param = {
+            class_cd : class_cd
+        };
+
+        var stdjson = JSON.parse( '<?php echo json_encode($current_std_id);?>' );
+        var checked = '';
+        var current_content_class_cd = '<?php echo $content->CLASS_CD ;?>';
+
+        $.ajax({
+            type : 'post',
+            url : "/notice/proc/getStudentfromclasscd",
+            async : true,
+            dataType : 'json',
+            data : param,
+            beforeSend : function(){
+                loadingShowHide();
+            },
+            success : function(response)  {
+                loadingShowHide();
+                let html = '';
+                if (response.length > 0) {
+                    
+                     html = '<div class="class_name write_list_name">';
+                    $.each( response , function ( key , item){
+                        
+                        if ( class_cd == current_content_class_cd ) {
+                            if ( $.inArray(item.STD_ID , stdjson ) < 0 ) checked = '';
+                            else checked = 'checked';
+                        } else checked = '';
+                        
+
+                        html += `<div class="name_list">
+                            <input type="checkbox" name="STD_ID" id="STD_ID${item.STD_ID}" value="${item.STD_ID}" class="_std_id" ${checked}>
+                            <label for="STD_ID${item.STD_ID}"></label>
+                            <span>${item.STD_NM}</span>
+                        </div>`;
+                    })
+                    html += "</div>";
+                } else {
+                    html = "<span>선택된 학생이 없습니다.</span>";
+                }
+                $('#stdList').html(html);
+            },
+            error : function(request, status, error){
+                console.log(error);
+            }
+        })
+    });
+
+    $(document).on('click' , '#classNotice' , function(){
+        
+        if ( $('#classNotice').prop('checked')){
+            $("input[name*=STD_ID]").prop('checked' , true);
+        } else {
+            $("input[name*=STD_ID]").prop('checked' , false);
+        }
+    });
+
+    $(document).on('click' , "input[name*=STD_ID]" , function(){
+        if ( $("input[name*=STD_ID]").length == $("input[name*=STD_ID]:checked").length ) {
+            $('#classNotice').prop('checked', true);
+        } else {
+            $('#classNotice').prop('checked', false);
+        }
+    })
+
+    $(document).on('click', '.btn_box .send' , function(e){
+        
+        var forms = $('form#fileupload');
+        var alertTitle = "알림장";
+        var alerticon = "warning";
+
+        if ( $("input[name='STD_ID']:checked").length < 1){
+            Swal.fire({
+                title: alertTitle,
+                text: "학생을 선택하여 주십시요",
+                icon: alerticon
+            });
+            $('#noteTxt').focus();
+            return false;
+        }
+
+        if ( $('#noteTitle').val() == ''){
+            Swal.fire({
+                title: alertTitle,
+                text: "제목을 입력하여 주십시요",
+                icon: alerticon
+            });
+            $('#noteTitle').focus();
+            return false;
+        }
+
+        if ( $('#noteTxt').val() == ''){
+            Swal.fire({
+                title: alertTitle,
+                text: "내용을 입력하여 주십시요",
+                icon: alerticon
+            });
+            $('#noteTxt').focus();
+            return false;
+        }
+
+        
+        Swal.fire({ 
+            text : "수정하시겠습니까?" , icon: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "확인",
+            cancelButtonText:"취소"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.preventDefault();
+                e.stopPropagation();
+                loadingShowHide();        
+
+                if (myDropzone.files != "") {
+                    // console.log(myDropzone.files);
+                    
+                    myDropzone.processQueue();
+
+                } else {
+                // if no file submit the form    
+                    goSubmit();
+                }
+            } else {
+                // loadingShowHide();
+            }
+        });
+    })
+
+    $(document).on('click', '#cancleDetail', function(){
+        $('#viewList').hide();
+        $('.mode_view').hide();
+        $('#viewForm').empty();
+        $('#viewDetail').show();
+    })
+});
+</script>
+
+<script type="text/javascript">
+var tempSave;
+
+var $btn = $('#tempSaveBtn');
+var SessionData = '';
+if ($('#tempSaveBtn').length > 0) {
+    tempSave = {
+        init: async function () {
+            SessionData = this.data();
+            if (SessionData == "") return;
+            let name = SessionData.name;
+            let loadData = '';
+            loadData = await this.get(name);
+            if (loadData == null) return;
+
+            let j = JSON.parse(loadData.TEMP_VALUE);
+            let now = new Date();
+            let currentTime = now.getTime();
+
+            if (currentTime > j.expireTime) {
+                this.delete();
+                return;
+            }
+
+            let value = j.value;
+            this.loadData(value);
+        },
+
+        set: function (name, value) {
+            let now = new Date();
+            let item = {
+                value: value,
+                expireTime: now.getTime() + 7200000,
+            };
+            let data = {
+                TEMP_KEY: name,
+                TEMP_VALUE: item,
+            }
+            fetch("/api/ajax/tempSave_save", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log('임시저장 성공');
+                });
+        },
+        get: async function (name) {
+            let data = {
+                TEMP_KEY: name
+            }
+            const response = await fetch("/api/ajax/tempSave_get", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+            const result = await response.json();
+            // console.log(result);
+            return result;
+        },
+        data: function () {
+            let j = $('#tempSaveBtn').data('target-area');
+            return j;
+        },
+        loadData: function (data) {
+            Swal.fire({
+                text: "임시저장 내용을 불러옵니다.",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "확인",
+                cancelButtonText: "취소"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let json = JSON.parse(data);
+                    $.each(json, function (i, k) {
+
+                        if ( i == 'noteTxt'){
+                            editor.html.set(k);
+                        } else {
+                            $('#' + i).val(k);
+                        }
+
+                       
+                    })
+                }
+            })
+        },
+        delete: function () {
+            let data = {
+                TEMP_KEY: SessionData.name,
+            }
+            console.log(data);
+            fetch("/api/ajax/tempSave_remove", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                });
+
+        }
+
+    };
+    tempSave.init();
+
+    // $('#tempSaveBtn').on('click', function () {
+    $(document).on('click', '#tempSaveBtn', function(){
+        Swal.fire({
+            text: "해당내용을 임시 저장 하시겠습니까?",
+            // icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#00341E",
+            cancelButtonColor: "#dddd",
+            confirmButtonText: "확인",
+            cancelButtonText: "취소"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var data = tempSave.data();
+                let name = data.name;
+                let value = {};
+                $.each(data.target, function (i, v) {
+                    value[v] = $('#' + v).val();
+                });
+                tempSave.set(name, JSON.stringify(value));
+            }
+        });
+    })
+}
 
 </script>

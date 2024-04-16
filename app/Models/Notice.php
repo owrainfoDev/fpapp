@@ -171,7 +171,10 @@
         public function get_noti_apnd_file($noti_seq){
             $imageType = ['jpg','gif','png','jpeg','bmp'];
             // 전체
-            $query = "SELECT * FROM TB_NOTI_APND_FILE TNAF WHERE TNAF.NOTI_SEQ = '". $noti_seq ."' ";
+            $query = "SELECT NOTI_SEQ , APND_FILE_SEQ AS SEQ , FILE_NM AS FILE_NAME , FILE_PATH , 
+                            FILE_EXT, FILE_ICON_TP, ALL_FILE_NM , ENT_DTTM, FILE_URL , 
+                            ORIGIN_FILE_NM AS FILE_ORG_NAME , FILE_SIZE , THUMBNAIL 
+                            FROM TB_NOTI_APND_FILE TNAF WHERE TNAF.NOTI_SEQ = '". $noti_seq ."' ";
 
             $rows = $this->db->query($query)->getResult();
             return ['data' => $rows];

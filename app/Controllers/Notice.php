@@ -134,16 +134,20 @@ class Notice extends BaseController
         // return 
     }
 
-    public function getStudentfromclasscd(){
+    public function getStudentfromclasscd($class_cd = null){
+
+        if ( $class_cd === null){
+            $class_cd = $this->data['class_cd'];
+        }
 
         $params = [
-                'class_cd' => $this->data['class_cd']
+                'class_cd' => $class_cd
         ];
 
         $students = new \App\Models\Students();
         $student_list = $students->getStudentfromClass($params);  // 학원 리스트
 
-        echo json_encode( $student_list );
+        return json_encode( $student_list );
     }
 
     public function detail($noti_seq){
@@ -322,7 +326,7 @@ class Notice extends BaseController
                         'FILE_EXT' => $file['FILE_EXT'],
                         'ENT_DTTM' => date("Y-m-d H:i:s"),
                         'ORIGIN_FILE_NM' => $file['ORIGIN_FILE_NM'],
-                        'FILE_URL' => $file['FILE_PATH'] . $file['FILE_NM'] .".". $file['FILE_EXT'],
+                        'FILE_URL' => $file['FILE_PATH'] . "/" . $file['FILE_NM'] .".". $file['FILE_EXT'],
                         'FILE_SIZE' => $file['FILE_SIZE']
                     ];
                     if ( $thumbnail = mp4tojpg( $file['FILE_PATH'] , $file['FILE_NM'] , $file['FILE_EXT'] ) ) {
@@ -354,20 +358,32 @@ class Notice extends BaseController
             }
         }
 
+        $current_class_cd = $detail['data']->CLASS_CD;
+        $current_students = $this->getStudentfromclasscd($current_class_cd);
         $data = [
             'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
             'data' => [
                 'detail' => $detail,
                 'file' => $f,
-                'noti_seq' => $noti_seq
-                ]
+                'noti_seq' => $noti_seq,
+                'current_students' => $current_students
+            ],
+            'class_list'    => $this->class_list,
+            'aca_id'        => $this->aca_id,
+            'user_id'       => $this->user_id,
+            'is_teacher'    => $this->is_teacher
         ];
-        return $this->template('notice/edit', $data , 'sub');
+
+        return $this->template('notice/edit', $data , 'none');
     }
 
     public function editProc(){
         $noticemodel = new \App\Models\Notice();
+        $students = new \App\Models\Students();
         date_default_timezone_set('ASIA/SEOUL');
+
+        $std_id = is_array( $this->data['STD_ID'] ) ? $this->data['STD_ID'] : (array)$this->data['STD_ID'] ;
+        $classinfo = $students->getClassInfofromClassCd($this->data['selctClass']);
 
         $params = [
             'NOTI_SEQ' => $this->data['noti_seq'],
@@ -378,6 +394,31 @@ class Notice extends BaseController
         ];
 
         $return = $noticemodel->_noti_main_update($params);
+
+
+        foreach ($std_id as $std){
+            $subparams = [
+                'NOTI_SEQ' => $this->data['noti_seq'],
+                'STD_ID' => $std,
+                'SEND_DTTM' => date("Y-m-d H:i:s")
+            ];
+            $noticemodel->_noti_std_insert($subparams);
+
+            $parant_id = $students->getParentsInfoFromStudents($std);
+            $stdinfo = $students->getUserInfo($std);
+            
+            $pushparams = [
+                'SENDER' => $this->data['USER_ID'], 
+                'USER_ID' => $parant_id, 
+                'ACA_ID' => $this->data['ACA_ID'] , 
+                'TITLE' => '[알림장]' . $classinfo->CLASS_NM . "-" . $stdinfo->USER_NM .'원생의 알림장', 
+                'MESSAGE' => '[알림장]' . $classinfo->CLASS_NM . "-" . $stdinfo->USER_NM .'원생의 알림장 - ' . $this->data['noteTitle'] , 
+                'REQUEST_PATH' => '/notice/' . $this->data['noti_seq'], 
+                "INSERT_USER_ID" => $this->data['USER_ID'],
+                "INSERT_DTTM" => date("Y-m-d H:i:s")
+            ];
+            $pushmessage->insert($pushparams);
+        }
 
         // 파일 업로드 
         if ( isset( $this->data['files'] ) && $this->data['files'] != '' ) {
@@ -424,13 +465,13 @@ class Notice extends BaseController
             'NOTI_SEQ' => $this->data['noti_seq'],
             'UPT_DTTM' => date("Y-m_d H:i:s"),
             'UPT_USER_ID' => $UPT_USER_ID,
-            'USER_ID' => $session->get('_user_id')
+            'USER_ID' => $session->get('user_id')
         ];
 
         $return = $noticemodel->_noti_main_delete($params);
 
         if ($return){
-            return json_encode(['status' => 'success' , 'msg'=>'등록성공' , 'redirect_to' => '/notice/' . $params['NOTI_SEQ'] ]);
+            return json_encode(['status' => 'success' , 'msg'=>'삭제성공' , 'redirect_to' => '/notice/' . $params['NOTI_SEQ'] ]);
         } else {
             return json_encode(['status' => 'fail' , 'msg'=>'등록실패']);
         }

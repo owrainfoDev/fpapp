@@ -24,8 +24,8 @@
         <div class="notice_list" id="noticeLoad">
             <?php if ( count($list->data) > 0 ) : ?>
                 <?php foreach ( $list->data as $data ) :?>
-                <div class="list ">
-                    <a href="notice/<?php echo $data->NOTI_SEQ; ?>">
+                <div class="list post-list" data-listno='<?php echo $data->NOTI_SEQ;?>'>
+                    <a href="/notice/<?php echo $data->NOTI_SEQ; ?>" class='detailhref'>
                         <div class="t_info">
                             <div class="notice_title title"><span><?php echo $data->TITLE; ?></span></div>
                             <div class="notice_author author"><span><?php echo $data->WRITER_NM; ?></span></div>
@@ -122,7 +122,7 @@ $(document).ready(function(){
     })
 
     // 상세 보기 
-    $(document).on('click', 'div.list > a', function(e){
+    $(document).on('click', '.detailhref', function(e){
         e.preventDefault();
         let href = $(this).prop('href');
         loadingShowHide();

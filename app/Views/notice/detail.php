@@ -6,26 +6,27 @@
     $photos = array();
 
     if ( isset( $files['image'] ) ) {
-        $title_photo = $files['image'][0]->FILE_PATH . "/" . $files['image'][0]->FILE_NM . "." . $files['image'][0]->FILE_EXT;
+        $title_photo = $files['image'][0]->FILE_PATH . "/" . $files['image'][0]->FILE_NAME . "." . $files['image'][0]->FILE_EXT;
 
         $photos = [];
         foreach ($files['image'] as $file){
 
             if ( ! $file->FILE_URL ) {
-                $filepath = $file->FILE_PATH . "/" . $file->FILE_NM . "." . $file->FILE_EXT;
+                $filepath = $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT;
                 $filepath =  str_replace( _ROOT_PATH , '' , $filepath ) ;
             }else {
                 $filepath = $file->FILE_URL;
             }
+            
             $filesrc = str_replace('//','/',$filepath);
             $filepath = WRITEPATH . $filesrc;
             
             $photos[] = [
                 'link' => $filesrc,
-                'orgfilename' => $file->ORIGIN_FILE_NM,
+                'orgfilename' => $file->FILE_ORG_NAME,
                 'size' => $file->FILE_SIZE,
-                'file_seq' => $file->APND_FILE_SEQ,
-                // 'thumbnail' => $file->THUMBNAIL == "Y" ? $file->FILE_PATH . "/" . $file->FILE_NM . ".jpg" : $file->FILE_PATH . "/" . $file->FILE_NM . "." . $file->FILE_EXT
+                'file_seq' => $file->SEQ,
+                // 'thumbnail' => $file->THUMBNAIL == "Y" ? $file->FILE_PATH . "/" . $file->FILE_NAME . ".jpg" : $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT
                 'thumbnail' => getThumbnailPreview($filepath)
             ];
         }
@@ -66,22 +67,10 @@
     </div>
         </div>
         <!-- [ 교사앱 : 교사앱에서만 보이기 - 알림장 수정/삭제 ] -->
-        
-        <?php // if ($detail->USER_ID == $session->get('user_id') ) :?>
         <?php if ( $is_teacher && ( ( $session->get('checkAuth') == "Y" && $detail->USER_ID == $session->get('user_id') ) || $session->get('checkAuth') == "N" )  ) : ?>
         <div class="btn_box" style="margin-top: auto; " id="btn_box">
             <button type="button" class="edit left" onclick="goEdit();">수정</button>
             <button type="button" class="del right" onclick="goDelete();">삭제</button>
-        </div>
-        <!-- [ 교사앱 : 삭제 모달 ]  -->
-        <div class="modal">
-            <div class="cont">
-                <p>삭제하시겠습니까?</p>
-                <div class="btn">
-                    <button class="cancel">취소</button>
-                    <button type="button" class="confirm">확인</button>
-                </div>
-            </div>
         </div>
         <?php endif; ?>
 
@@ -105,7 +94,23 @@ var _rowHeight = 243;
             });
 
 function goEdit(){
-    location.href="/notice/<?php echo $detail->NOTI_SEQ;?>/edit";
+
+    let noti_seq = '<?php echo $detail->NOTI_SEQ;?>';
+
+    let href = '/notice/'+ noti_seq +'/edit';
+
+    let postdata = {
+        noti_seq : noti_seq,
+    };
+
+    loadingShowHide();
+    $.get( href , function(data , status){
+        $('#viewList').hide();
+        $('.mode_view').hide();
+        $('#viewForm').html(data).show();
+        loadingShowHide();
+    })
+    // location.href="/notice/<?php echo $detail->NOTI_SEQ;?>/edit";
 }
 
 function goDelete(){
@@ -120,13 +125,12 @@ function goDelete(){
         cancelButtonText: "취소"
 
     }).then((result) => {
+        loadingShowHide();
         if (result.isConfirmed) {
             var content_data = {
                 action : 'deleteProc',
                 noti_seq : '<?php echo $noti_seq; ?>'
             }
-
-
             fetch("/api/notice", {
                         method: "POST",
                         headers: {
@@ -136,32 +140,33 @@ function goDelete(){
                     })
             .then((response) => response.json())
             .then((data) => {
-                console.log(data);
-                return data;
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'center-center',
+                    showConfirmButton: false,
+                    timer: 500,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'success',
+                    title: '알림장이 삭제 되었습니다.'
+                }).then(function (result) {
+                    if (true) {
+                        $('.mode_view').empty().hide();
+                        $('#viewList').show();
+                        $('div[data-listno="<?php echo $detail->NOTI_SEQ;?>"]').fadeOut("normal", function() {
+                            $(this).remove();
+                        });
+                        loadingShowHide();
+                    }
+                });
             });
 
-
-
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'center-center',
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            })
-            Toast.fire({
-                icon: 'success',
-                title: '알림장이 삭제 되었습니다.'
-            }).then(function (result) {
-                if (true) {
-
-                    location.href="/notice/"
-                }
-            });
+            
         }
     });
 }

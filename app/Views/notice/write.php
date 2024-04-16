@@ -88,6 +88,7 @@
      editor = new FroalaEditor("#noteTxt", {
 	        'key': '5OA4gF4D3I3G3B6C4D-13TMIBDIa2NTMNZFFPFZe2a1Id1f1I1fA8D6C4F4G3H3I2A18A15A6=='
 	        ,'height': 290
+            ,'attribution': false
 	        // , imageUploadParam: 'uploadImg'
 
 	        // // Set the image upload URL.
@@ -138,7 +139,7 @@
         forms.is_teacher = '<?php echo $is_teacher;?>'
         forms.files = dropzonefiles;
 
-        console.log(forms);
+        loadingShowHide();
 
         fetch("/api/notice", {
                     method: "POST",
@@ -149,7 +150,7 @@
                 })
         .then((response) => response.json())
         .then((data) => {
-            console.log( data );
+            loadingShowHide();
             if ( data.status == 'success'){
                 
                 if ( typeof tempSave == "object" )  tempSave.delete(); // 임시 저장 삭제
@@ -176,6 +177,7 @@
 
                 
             } else {
+                loadingShowHide();
                 Swal.fire("등록에 실패하였습니다.");
                 location.reload();
             }
@@ -330,6 +332,7 @@ $(document).ready(function(){
             return false;
         }
 
+        
         Swal.fire({ 
             text : "등록하시겠습니까?" , icon: "info",
             showCancelButton: true,
@@ -341,21 +344,26 @@ $(document).ready(function(){
             if (result.isConfirmed) {
                 e.preventDefault();
                 e.stopPropagation();
+                loadingShowHide();        
 
                 if (myDropzone.files != "") {
                     // console.log(myDropzone.files);
+                    
                     myDropzone.processQueue();
+
                 } else {
                 // if no file submit the form    
                     goSubmit();
                 }
+            } else {
+                // loadingShowHide();
             }
         });
     })
 });
 </script>
 
-<script >
+<script type="text/javascript">
 var tempSave;
 
 var $btn = $('#tempSaveBtn');
