@@ -163,7 +163,8 @@ $(document).ready(function(){
     var currenturl = '<?php echo current_url(true) ?>';
     console.log(currenturl);
     if (typeof (history.pushState) != "undefined") { 
-	    history.pushState('state', 'title', currenturl); 
+	    // history.pushState('state', 'title', currenturl); 
+        history.replaceState(null,null, currenturl)
     } else { 
         //브라우저가 지원하지 않는 경우 처리
     }
