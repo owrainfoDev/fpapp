@@ -162,6 +162,11 @@ function goDelete(){
 $(document).ready(function(){
     var currenturl = '<?php echo current_url(true) ?>';
     console.log(currenturl);
-    changeUrl(currenturl);
+    if (typeof (history.pushState) != "undefined") { 
+	    history.pushState('state', 'title', currenturl); 
+    } else { 
+        //브라우저가 지원하지 않는 경우 처리
+    }
+    // changeUrl(currenturl);
 })
 </script>
