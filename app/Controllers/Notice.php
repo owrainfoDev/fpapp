@@ -313,22 +313,20 @@ class Notice extends BaseController
                 ];
                 $noticemodel->_noti_std_insert($subparams);
 
-                die();
-
-                // $parant_id = $students->getParentsInfoFromStudents($std);
-                // $stdinfo = $students->getUserInfo($std);
+                $parant_id = $students->getParentsInfoFromStudents($std);
+                $stdinfo = $students->getUserInfo($std);
                 
-                // $pushparams = [
-                //     'SENDER' => $this->data['USER_ID'], 
-                //     'USER_ID' => $parant_id, 
-                //     'ACA_ID' => $this->data['ACA_ID'] , 
-                //     'TITLE' => '[알림장]' . $classinfo->CLASS_NM . "-" . $stdinfo->USER_NM .'원생의 알림장', 
-                //     'MESSAGE' => '[알림장]' . $classinfo->CLASS_NM . "-" . $stdinfo->USER_NM .'원생의 알림장 - ' . $this->data['noteTitle'] , 
-                //     'REQUEST_PATH' => '/notice/' . $noti_seq, 
-                //     "INSERT_USER_ID" => $this->data['USER_ID'],
-                //     "INSERT_DTTM" => date("Y-m-d H:i:s")
-                // ];
-                // $pushmessage->insert($pushparams);
+                $pushparams = [
+                    'SENDER' => $this->data['USER_ID'], 
+                    'USER_ID' => $parant_id, 
+                    'ACA_ID' => $this->data['ACA_ID'] , 
+                    'TITLE' => '[알림장]' . $classinfo->CLASS_NM . "-" . $stdinfo->USER_NM .'원생의 알림장', 
+                    'MESSAGE' => '[알림장]' . $classinfo->CLASS_NM . "-" . $stdinfo->USER_NM .'원생의 알림장 - ' . $this->data['noteTitle'] , 
+                    'REQUEST_PATH' => '/notice/' . $noti_seq, 
+                    "INSERT_USER_ID" => $this->data['USER_ID'],
+                    "INSERT_DTTM" => date("Y-m-d H:i:s")
+                ];
+                $pushmessage->insert($pushparams);
             }
 
             // 파일 업로드 
@@ -452,6 +450,7 @@ class Notice extends BaseController
                 "INSERT_DTTM" => date("Y-m-d H:i:s")
             ];
 
+            
             $pushmessage->insert($pushparams);
         }
 
