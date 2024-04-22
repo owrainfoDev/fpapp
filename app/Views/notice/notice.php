@@ -1,12 +1,4 @@
 <?php $search = $parameter['search'] ?? ''; ?>
-<!-- dropzone-->
-<script src="/resources/dropzone/dropzone.min.js"></script>
-<link rel="stylesheet" href="/resources/dropzone/dropzone.min.css" type="text/css" />
-<!-- dropzone-->
-<!-- froala_editor-->
-<link href="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/js/froala_editor.pkgd.min.js"></script>
-<!-- froala_editor-->
 <!-- content -->
 <div class="sub_content notice_content" id="viewList" style="overflow-y:auto ; height: 90vh">
     <div class="sub_inner">
@@ -25,7 +17,7 @@
             <?php if ( count($list->data) > 0 ) : ?>
                 <?php foreach ( $list->data as $data ) :?>
                 <div class="list post-list" data-listno='<?php echo $data->NOTI_SEQ;?>'>
-                    <a href="/notice/<?php echo $data->NOTI_SEQ; ?>" class='detailhref'>
+                    <a href="/notice/<?php echo $data->NOTI_SEQ; ?>" class='detailhref' data-seq="<?php echo $data->NOTI_SEQ;?>">
                         <div class="t_info">
                             <div class="notice_title title"><span><?php echo $data->TITLE; ?></span></div>
                             <div class="notice_author author"><span><?php echo $data->WRITER_NM; ?></span></div>
@@ -125,14 +117,11 @@ $(document).ready(function(){
     $(document).on('click', '.detailhref', function(e){
         e.preventDefault();
         let href = $(this).prop('href');
-        loadingShowHide();
-        $.get( href , function(data , status){
-            $('#viewList').hide();
-            $('#viewDetail').html(data).show();
-            loadingShowHide();
-        })
+        let data = {};
+        goDetail(href , data);
+    });
 
-    })
+    <?php if ( isset($detail_url) ) :?> goDetail('<?php echo $detail_url;?>', {}); <?php endif; ?>
 
     // 상단 뒤로 가기
     $(document).on('click', '.top_back' , function(e){
@@ -140,8 +129,20 @@ $(document).ready(function(){
         if ( $('#viewList').css('display') == "block" ) {
             console.log( '--- 홈화면 ---' );
         }
-        $('.mode_view').empty().hide();
-        $('#viewList').show();
+        var lasturl = getLastUrlSegment(document.URL);
+        
+        var backurl = document.URL.split('/').slice(0, -1).join('/');
+        history.pushState(null, null , backurl );
+
+        if ( lasturl == 'edit' ){
+            $('#viewForm').empty().hide();
+            $('#viewDetail').show();
+        } else {
+            $('.mode_view').empty().hide();
+            $('#viewList').show();
+        }
+
+        
     })
 
     // writer
@@ -149,14 +150,39 @@ $(document).ready(function(){
         e.preventDefault();
         let href = $(this).prop('href');
         loadingShowHide();
-        $.get( href , function(data , status){
-            $('#viewList').hide();
-            $('#viewForm').html(data).show();
-            loadingShowHide();
-        })
+        location.href=href;
+        // $.get( href , function(data , status){
+        //     $('#viewList').hide();
+        //     $('#viewForm').html(data).show();
+        //     loadingShowHide();
+        // })
 
     })
 
 });
+
+function goDetail(href , data){
+
+    $.ajax({
+        url: href,
+        async : true,
+        dataType : 'html',
+        data : data,
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        beforeSend: function(){
+            loadingShowHide();
+        },
+        success : function(data)  {
+            $('#viewList').hide();
+            $('#viewDetail').html(data).show();
+            loadingShowHide();
+            history.pushState(null, null , href);
+        },
+        error : function(request, status, error){
+            console.log(error);
+        }
+    });
+
+}
 
 </script>   

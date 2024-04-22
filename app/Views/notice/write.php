@@ -1,3 +1,12 @@
+<!-- dropzone-->
+<script src="/resources/dropzone/dropzone.min.js"></script>
+<link rel="stylesheet" href="/resources/dropzone/dropzone.min.css" type="text/css" />
+<!-- dropzone-->
+<!-- froala_editor-->
+<link href="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/js/froala_editor.pkgd.min.js"></script>
+<!-- froala_editor-->
+
 <div class="sub_content t_write_cont t_content notice_write">
     <div class="sub_inner">
         <form action="/api/notice" id="fileupload" method="POST" enctype="multipart/form-data">

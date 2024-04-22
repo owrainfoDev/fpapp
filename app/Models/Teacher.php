@@ -72,10 +72,17 @@
             return $query->getResult();
         }
 
-        // 원장 또는 행정실일 경우 
+        // 원장 또는 행정실일 경우 강사 우선 
         public function teacherAuthYn($emp_id){
-            $query = $this->db->query( "SELECT COUNT(*) as cnt FROM TB_USER_TP_AUTH_GRP WHERE USER_ID = ? AND AUTH_GRP_CD IN ( 'AG0101','AG0104','AG0107','AG0108' ) " , array( $emp_id ));
-            return $query->getRow()->cnt;
+
+            $query = $this->db->query( "SELECT COUNT(*) as cnt FROM TB_USER_TP_AUTH_GRP WHERE USER_ID = ? AND AUTH_GRP_CD IN ( 'AG0102' ) " , array( $emp_id ));
+            if ( $query->getRow()->cnt ) {
+                return 0;    
+            } else {
+
+                $query = $this->db->query( "SELECT COUNT(*) as cnt FROM TB_USER_TP_AUTH_GRP WHERE USER_ID = ? AND AUTH_GRP_CD IN ( 'AG0101','AG0104','AG0107','AG0108' ) " , array( $emp_id ));
+                return $query->getRow()->cnt;
+            }
         }
 
     }

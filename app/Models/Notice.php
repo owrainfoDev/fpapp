@@ -211,9 +211,42 @@
         
         }
 
-        public function _noti_std_insert($params){
-            return $this->db->table('TB_NOTI_READ')->insert($params);
+        public function _noti_std_check_delete($std_array , $noti_seq ){
+            $this->db->table('TB_NOTI_READ')
+                ->where('NOTI_SEQ' , $noti_seq)
+                ->whereNotIn('STD_ID', $std_array)
+                ->delete();
         }
+
+        public function _noti_std_insert($params){
+
+            $query = $this->db->table('TB_NOTI_READ')
+                ->where('NOTI_SEQ' , $params['NOTI_SEQ'] )
+                ->where('STD_ID' , $params['STD_ID'] )
+                ->where('USER_ID !=' , '')
+                ->select('*')->get();
+
+            if ( count( $query->getResult() ) > 0 ) return ;
+            // die();
+            
+            $this->db->table('TB_NOTI_READ')
+                ->setData([
+                        'NOTI_SEQ' => $params['NOTI_SEQ'],
+                        'STD_ID' => $params['STD_ID'],
+                        'SEND_DTTM' => $params['SEND_DTTM']
+                    ])
+                ->upsert();
+                // ->getCompiledUpsert();
+            //         die();
+
+            // return $this->db->table('TB_NOTI_READ')->insert($params);
+        }
+        // $subparams = [
+        //     'NOTI_SEQ' => $this->data['noti_seq'],
+        //     'STD_ID' => $std,
+        //     'SEND_DTTM' => date("Y-m-d H:i:s")
+        // ];
+
 
         public function _getSeq(){
             $noti_seq = $this->db->query("select FN_GET_JOB_SEQ('TB_NOTI') as NOTI_SEQ ")->getRow(0);

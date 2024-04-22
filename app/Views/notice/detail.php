@@ -96,21 +96,9 @@ var _rowHeight = 243;
 function goEdit(){
 
     let noti_seq = '<?php echo $detail->NOTI_SEQ;?>';
-
     let href = '/notice/'+ noti_seq +'/edit';
-
-    let postdata = {
-        noti_seq : noti_seq,
-    };
-
     loadingShowHide();
-    $.get( href , function(data , status){
-        $('#viewList').hide();
-        $('.mode_view').hide();
-        $('#viewForm').html(data).show();
-        loadingShowHide();
-    })
-    // location.href="/notice/<?php echo $detail->NOTI_SEQ;?>/edit";
+    location.href="/notice/<?php echo $detail->NOTI_SEQ;?>/edit";
 }
 
 function goDelete(){
@@ -170,4 +158,10 @@ function goDelete(){
         }
     });
 }
+
+$(document).ready(function(){
+    var currenturl = '<?php echo current_url(true) ?>';
+    // console.log(currenturl);
+    changeUrl(currenturl);
+})
 </script>

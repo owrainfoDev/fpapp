@@ -9,6 +9,14 @@
     }
 
 ?>
+<!-- dropzone-->
+<script src="/resources/dropzone/dropzone.min.js"></script>
+<link rel="stylesheet" href="/resources/dropzone/dropzone.min.css" type="text/css" />
+<!-- dropzone-->
+<!-- froala_editor-->
+<link href="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/js/froala_editor.pkgd.min.js"></script>
+<!-- froala_editor-->
 <div class="sub_content t_write_cont t_content notice_write">
     <div class="sub_inner">
         <form action="/api/notice" id="fileupload" method="POST" enctype="multipart/form-data">
@@ -17,7 +25,7 @@
             <div class="form_cont">
                 <div class="class" id="selclass">
                     <!-- 선생님이 맡은 반 -->
-                    <select name="selctClass" id="selctClass">
+                    <select name="selctClass" id="selctClass" disabled>
                         <option value="선택">선택</option>
                         <?php foreach ( $class_list as $class ) :?>
                             <option value="<?php echo $class->CLASS_CD;?>" <?php echo $class->CLASS_CD == $content->CLASS_CD ? "selected" : "" ;?>><?php echo $class->CLASS_NM;?></option>
@@ -186,6 +194,8 @@
   
 
     function goSubmit(){
+
+        $('#selctClass').removeAttr('disabled');
         var forms = $('form#fileupload').serializeObject();
         forms.action = 'editProc';
         forms.ACA_ID = '<?php echo $aca_id;?>';
@@ -238,63 +248,18 @@
             }
         });
     }
+
+    function changeSelectDisabled(value){
+        
+
+    }
 </script>
 
 
 <script type="text/javascript">
-
 $(document).ready(function(){
-    // 반선택
-    $(document).on('change' , '#selctClass', function(){
-        let class_cd = $(this).val() ;
-        let param = {
-            class_cd : class_cd
-        };
-
-        var stdjson = JSON.parse( '<?php echo json_encode($current_std_id);?>' );
-        var checked = '';
-        var current_content_class_cd = '<?php echo $content->CLASS_CD ;?>';
-
-        $.ajax({
-            type : 'post',
-            url : "/notice/proc/getStudentfromclasscd",
-            async : true,
-            dataType : 'json',
-            data : param,
-            beforeSend : function(){
-                loadingShowHide();
-            },
-            success : function(response)  {
-                loadingShowHide();
-                let html = '';
-                if (response.length > 0) {
-                    
-                     html = '<div class="class_name write_list_name">';
-                    $.each( response , function ( key , item){
-                        
-                        if ( class_cd == current_content_class_cd ) {
-                            if ( $.inArray(item.STD_ID , stdjson ) < 0 ) checked = '';
-                            else checked = 'checked';
-                        } else checked = '';
-                        
-
-                        html += `<div class="name_list">
-                            <input type="checkbox" name="STD_ID" id="STD_ID${item.STD_ID}" value="${item.STD_ID}" class="_std_id" ${checked}>
-                            <label for="STD_ID${item.STD_ID}"></label>
-                            <span>${item.STD_NM}</span>
-                        </div>`;
-                    })
-                    html += "</div>";
-                } else {
-                    html = "<span>선택된 학생이 없습니다.</span>";
-                }
-                $('#stdList').html(html);
-            },
-            error : function(request, status, error){
-                console.log(error);
-            }
-        })
-    });
+    var currenturl = '<?php echo current_url(true) ?>';
+    changeUrl(currenturl);
 
     $(document).on('click' , '#classNotice' , function(){
         
@@ -361,11 +326,11 @@ $(document).ready(function(){
             if (result.isConfirmed) {
                 e.preventDefault();
                 e.stopPropagation();
-                loadingShowHide();        
+                        
 
                 if (myDropzone.files != "") {
                     // console.log(myDropzone.files);
-                    
+                    loadingShowHide();    
                     myDropzone.processQueue();
 
                 } else {
@@ -383,148 +348,9 @@ $(document).ready(function(){
         $('.mode_view').hide();
         $('#viewForm').empty();
         $('#viewDetail').show();
+        var currenturl = '/notice/<?php echo $content->NOTI_SEQ?>';
+        changeUrl(currenturl);
+        // location.href='/notice/<?php echo $content->NOTI_SEQ?>';
     })
 });
-</script>
-
-<script type="text/javascript">
-var tempSave;
-
-var $btn = $('#tempSaveBtn');
-var SessionData = '';
-if ($('#tempSaveBtn').length > 0) {
-    tempSave = {
-        init: async function () {
-            SessionData = this.data();
-            if (SessionData == "") return;
-            let name = SessionData.name;
-            let loadData = '';
-            loadData = await this.get(name);
-            if (loadData == null) return;
-
-            let j = JSON.parse(loadData.TEMP_VALUE);
-            let now = new Date();
-            let currentTime = now.getTime();
-
-            if (currentTime > j.expireTime) {
-                this.delete();
-                return;
-            }
-
-            let value = j.value;
-            this.loadData(value);
-        },
-
-        set: function (name, value) {
-            let now = new Date();
-            let item = {
-                value: value,
-                expireTime: now.getTime() + 7200000,
-            };
-            let data = {
-                TEMP_KEY: name,
-                TEMP_VALUE: item,
-            }
-            fetch("/api/ajax/tempSave_save", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log('임시저장 성공');
-                });
-        },
-        get: async function (name) {
-            let data = {
-                TEMP_KEY: name
-            }
-            const response = await fetch("/api/ajax/tempSave_get", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            })
-            const result = await response.json();
-            // console.log(result);
-            return result;
-        },
-        data: function () {
-            let j = $('#tempSaveBtn').data('target-area');
-            return j;
-        },
-        loadData: function (data) {
-            Swal.fire({
-                text: "임시저장 내용을 불러옵니다.",
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "확인",
-                cancelButtonText: "취소"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let json = JSON.parse(data);
-                    $.each(json, function (i, k) {
-
-                        if ( i == 'noteTxt'){
-                            editor.html.set(k);
-                        } else {
-                            $('#' + i).val(k);
-                        }
-
-                       
-                    })
-                }
-            })
-        },
-        delete: function () {
-            let data = {
-                TEMP_KEY: SessionData.name,
-            }
-            console.log(data);
-            fetch("/api/ajax/tempSave_remove", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log(data);
-                });
-
-        }
-
-    };
-    tempSave.init();
-
-    // $('#tempSaveBtn').on('click', function () {
-    $(document).on('click', '#tempSaveBtn', function(){
-        Swal.fire({
-            text: "해당내용을 임시 저장 하시겠습니까?",
-            // icon: "question",
-            showCancelButton: true,
-            confirmButtonColor: "#00341E",
-            cancelButtonColor: "#dddd",
-            confirmButtonText: "확인",
-            cancelButtonText: "취소"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                var data = tempSave.data();
-                let name = data.name;
-                let value = {};
-                $.each(data.target, function (i, v) {
-                    value[v] = $('#' + v).val();
-                });
-                tempSave.set(name, JSON.stringify(value));
-            }
-        });
-    })
-}
-
 </script>

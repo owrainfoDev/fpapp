@@ -21,3 +21,13 @@ function loadingShowHide(){
     }
 }
 
+function changeUrl(currenturl){
+    if ( currenturl == '' ) {
+        return;
+    }
+    history.pushState(null, null , currenturl);
+}
+
+function getLastUrlSegment(url) {
+    return new URL(url).pathname.split('/').filter(Boolean).pop();
+}

@@ -113,9 +113,25 @@ label.error
     });
 
     myDropzone.on("addedfile", function(file) {
-        // console.log('--추가--')
         if (file.url){
-            
+            console.log( file.url );
+
+            let ext = getFileExtension(file.url);
+            let accept_ext = this.options.acceptedFiles;
+
+            let videoext = '.mp4,.MP4';
+            if (videoext.indexOf(ext) > 0){
+                vcnt++;
+                if ( document.getElementById('vidcnt') ) {
+                    document.getElementById('vidcnt').innerHTML = '동영상' + vcnt;
+                }
+            } else {
+                pcnt++;
+                if ( document.getElementById('phocnt') ) {
+                    document.getElementById('phocnt').innerHTML = '사진' + pcnt;
+                }
+            }
+
         } else {
             
             let ext = getFileExtension(file.upload.filename);
@@ -162,21 +178,21 @@ label.error
 
                     // Don't resize if it's small enough
                     if (width <= MAX_WIDTH && height <= MAX_HEIGHT) {
-                        myDropzone.enqueueFile(file);
+                        // myDropzone.enqueueFile(file);
                         return;
                     }
                     // Calc new dims otherwise
 
                     if (width > height) {
-                            if (width > MAX_WIDTH) {
-                                height *= MAX_WIDTH / width;
-                                width = MAX_WIDTH;
-                            }
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
                     } else {
-                            if (height > MAX_HEIGHT) {
-                                width *= MAX_HEIGHT / height;
-                                height = MAX_HEIGHT;
-                            }
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
                     }
                     // Resize
                     var canvas = document.createElement('canvas');
@@ -190,7 +206,7 @@ label.error
                     myDropzone.files[origFileIndex] = resizedFile;
                     // Enqueue added file manually making it available for
                     // further processing by dropzone
-                    myDropzone.enqueueFile(resizedFile);
+                    // myDropzone.enqueueFile(resizedFile);
                 });
             });
             
