@@ -176,7 +176,10 @@ function goDetail(href , data){
             $('#viewList').hide();
             $('#viewDetail').html(data).show();
             loadingShowHide();
-            history.pushState(null, null , href);
+
+            console.log( location.origin );
+
+            // history.pushState(null, null , href);
         },
         error : function(request, status, error){
             console.log(error);
