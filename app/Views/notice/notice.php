@@ -177,7 +177,7 @@ function goDetail(href , data){
             $('#viewDetail').html(data).show();
             loadingShowHide();
 
-            console.log( location.origin );
+            // console.log( location.origin );
 
             // history.pushState(null, null , href);
         },

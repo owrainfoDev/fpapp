@@ -162,6 +162,6 @@ function goDelete(){
 $(document).ready(function(){
     var currenturl = '<?php echo current_url(true) ?>';
     console.log(currenturl);
-    // changeUrl(currenturl);
+    changeUrl(currenturl);
 })
 </script>
