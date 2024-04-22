@@ -179,7 +179,7 @@ function goDetail(href , data){
 
             // console.log( location.origin );
 
-            // history.pushState(null, null , href);
+            history.pushState(null, null , href);
         },
         error : function(request, status, error){
             console.log(error);
