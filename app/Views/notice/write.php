@@ -1,7 +1,3 @@
-<!-- dropzone-->
-<script src="/resources/dropzone/dropzone.min.js"></script>
-<link rel="stylesheet" href="/resources/dropzone/dropzone.min.css" type="text/css" />
-<!-- dropzone-->
 <!-- froala_editor-->
 <link href="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/froala-editor@3.1.0/js/froala_editor.pkgd.min.js"></script>

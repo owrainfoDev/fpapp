@@ -130,9 +130,15 @@ $(document).ready(function(){
             console.log( '--- 홈화면 ---' );
         }
         var lasturl = getLastUrlSegment(document.URL);
+
         
+
         var backurl = document.URL.split('/').slice(0, -1).join('/');
         history.pushState(null, null , backurl );
+
+        if ( backurl == window.location.origin ) {
+            location.replace( window.location.origin )
+        }
 
         if ( lasturl == 'edit' ){
             $('#viewForm').empty().hide();

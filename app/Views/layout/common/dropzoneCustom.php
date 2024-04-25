@@ -1,3 +1,7 @@
+<!-- dropzone-->
+<script src="/resources/dropzone/dropzone.min.js"></script>
+<link rel="stylesheet" href="/resources/dropzone/dropzone.min.css" type="text/css" />
+<!-- dropzone-->
 
 <style>
 label.error
@@ -36,13 +40,13 @@ label.error
 
 .dropzone .dz-preview .dz-image{
 	border-radius:0;
-	width:50px;
-	height:40px;
-	margin: 0 10px;
+	width: 88px;
+	height:88px;
+	margin: 10px 10px auto;
 }
 
 .dropzone .dz-preview .dz-image img{
-	height:40px
+	height:88px;
 }
 
 .dropzone .dz-preview .dz-remove{
@@ -65,6 +69,9 @@ label.error
     display:none;
 }
 
+.dropzone.dz-clickable {
+    min-height:100px;
+}
 
 </style>
 
@@ -77,6 +84,7 @@ label.error
     Dropzone.autoDiscover = false;
     var pcnt = 0;
     var vcnt = 0;
+    var DropzoneFileTotal = 0;
 
     var myDropzone = new Dropzone("#dropzone", {
         url: "/fileupload",
@@ -113,9 +121,9 @@ label.error
     });
 
     myDropzone.on("addedfile", function(file) {
+        
         if (file.url){
-            console.log( file.url );
-
+            
             let ext = getFileExtension(file.url);
             let accept_ext = this.options.acceptedFiles;
 
@@ -131,7 +139,7 @@ label.error
                     document.getElementById('phocnt').innerHTML = '사진' + pcnt;
                 }
             }
-
+            DropzoneFileTotal++;
         } else {
             
             let ext = getFileExtension(file.upload.filename);
@@ -141,7 +149,8 @@ label.error
             
             if ( pos < 0 ){
                 Swal.fire({ text : "해당파일은 업로드 하실 수 없습니다." , icon: "question" });
-                this.removeFile(file);        
+                this.removeFile(file);     
+                return ;   
             } else {
                 
                 let videoext = '.mp4,.MP4';
@@ -156,7 +165,7 @@ label.error
                         document.getElementById('phocnt').innerHTML = '사진' + pcnt;
                     }
                 }
-                
+                DropzoneFileTotal++;
             }
 
             // Hookup the start button
@@ -248,7 +257,14 @@ label.error
                 document.getElementById('phocnt').innerHTML = '사진' + pcnt;
                 }
             }
+        }   
+        for(key in myDropzone.files ) {
+            if ( file.upload.uuid  == myDropzone.files[key].upload.uuid ) {
+                delete myDropzone.files[key];
+            }
         }
+        DropzoneFileTotal--;
+        myDropzone.files = myDropzone.files.filter(x => x !== null);
     });
 
     // Add mmore data to send along with the file as POST data. (optional)

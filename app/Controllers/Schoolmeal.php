@@ -12,43 +12,41 @@ class Schoolmeal extends BaseController
     public $pagename = '오늘의급식';
     public $pn = 'schoolmeal';
 
-    protected $data;
+    protected $data = [];
     protected $meal;
     protected $authinfo;
-    protected $user_id;
+    // protected $user_id;
     protected $userinfo;
     protected $is_teacher;
-    protected $stdInfo;
-    protected $aca_id;
-    protected $class_list;
     protected $year;
+    protected $class_list;
+    protected $stdInfo;
+    protected $limit = 5;
+    protected $aca_id;
+    protected $login;
+    protected $std_id;
+    protected $user_id;
+    protected $checkAuth;
+    protected $detail_url = false ;
+    protected $request;
 
     public function __construct()
     {
+        $this->request = \Config\Services::request();
+
+        $sendflag = isset($_POST['sendflag']) ?? '';
         $session = session();
-        $this->user_id = $session->get('_user_id');
-        $this->authinfo = new \App\Models\AuthorInfo($this->user_id);
-        $this->authinfo->year = $session->get("year");
-        $this->userinfo = $this->authinfo->info();
-        $this->is_teacher = $this->authinfo->is_teacher();
-        $this->year = $session->get("year");
-
-        $students = new \App\Models\Students();
-        $params = [
-            'userid' => $this->user_id,
-            'aca_id' => $this->userinfo->ACA_ID,
-            'is_teacher' => $this->is_teacher === true ? "Y" : "N",
-            'year' => $this->year
-        ];
-
-        $this->aca_id = $this->userinfo->ACA_ID;
-        if ($this->is_teacher !== true) {
-            $this->stdInfo = $this->authinfo->stdInfo($session->get('_std_id'));
-            $params['std_id'] = $session->get("_std_id");
-            $this->aca_id = $this->stdInfo['ACA_ID'];
-        }
-
-        $this->class_list = $students->getClassListFromTeacher($params);  // 학원 리스트
+        if (! $session->has('user_id') || $sendflag == "Y"){
+            $this->getUserAuth();
+        } 
+        // $this->getUserAuth();
+        $this->is_teacher = $session->get('is_teacher');
+        $this->year = $session->get('year');
+        $this->user_id = $session->get('user_id');
+        $this->std_id = $session->get('std_id');
+        $this->aca_id = $session->get('aca_id');
+        $this->class_list = $session->get('class_list');
+        $this->checkAuth = $session->get('checkAuth');
     }
 
     public function index(){
@@ -63,7 +61,7 @@ class Schoolmeal extends BaseController
             'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
             'html' => $content,
             'auth' => $this->userinfo,
-            'is_teacher' => $this->authinfo->is_teacher()
+            'is_teacher' => $this->is_teacher
         ];
         return $this->template('schoolmeal/schoolmeal', $data , 'sub');
     }
@@ -80,10 +78,13 @@ class Schoolmeal extends BaseController
             'TODAY' => $today
         ];
 
-        if ( $request->getVar('more') == null || $request->getVar('more') == '' || $request->getVar('more') == 0) {
-            $list = $meal->list($params) ;
+        $per_page = $this->limit;
+        $page_first = ($page-1)*$per_page ;
+        for($i = $page_first ; $i < ($page*$per_page) ; $i++){
+            
+            $params['TODAY'] = date("Y-m-d" , strtotime($today . " -" . $i . " day"));
             $c = [];
-            foreach ( $list as $a ){
+            foreach ( $meal->list($params) as $a ){
                 $fpa = $meal->_aca_meal_daily_file_select([
                     "ACA_ID" => $params['ACA_ID'],
                     'MEAL_DT' => $params['TODAY'],
@@ -101,41 +102,9 @@ class Schoolmeal extends BaseController
                     'ACA_ID'       => $a->ACA_ID,
                     'images' => $fpa
                 ];
-            }
 
+            }
             $data[] = [ 'data' => $c , 'today' => $params['TODAY'] ];
-        
-
-        } else {
-        
-            $per_page = 3;
-            $page_first = ($page-1)*$per_page + 1;
-            for($i = $page_first ; $i <= ($page*$per_page) ; $i++){
-                
-                $params['TODAY'] = date("Y-m-d" , strtotime($today . " -" . $i . " day"));
-                $c = [];
-                foreach ( $meal->list($params) as $a ){
-                    $fpa = $meal->_aca_meal_daily_file_select([
-                        "ACA_ID" => $params['ACA_ID'],
-                        'MEAL_DT' => $params['TODAY'],
-                        'MEAL_TP'  => $a->MEAL_TP
-                    ]);
-                    $c[]     = [
-                        'GB'       => $a->GB,
-                        'MEAL_TP'       => $a->MEAL_TP,
-                        'MEAL_NM'       => $a->MEAL_NM,
-                        'MEAL_DESC'       => $a->MEAL_DESC,
-                        'SNACK_DESC'       => $a->SNACK_DESC,
-                        'MEAL_DT'       => $a->MEAL_DT,
-                        'ENT_DTTM'       => $a->ENT_DTTM,
-                        'TEACHER_NM'       => $a->TEACHER_NM,
-                        'ACA_ID'       => $a->ACA_ID,
-                        'images' => $fpa
-                    ];
-
-                }
-                $data[] = [ 'data' => $c , 'today' => $params['TODAY'] ];
-            }
         }
         
         
@@ -165,7 +134,9 @@ class Schoolmeal extends BaseController
         $data = [
             'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
             'auth' => $this->userinfo,
-            'is_teacher' => $this->authinfo->is_teacher()
+            'aca_id'        => $this->aca_id,
+            'user_id'       => $this->user_id,
+            'is_teacher'    => $this->is_teacher
         ];
         return $this->template('schoolmeal/todaywrite', $data , 'sub');
     }
@@ -256,6 +227,7 @@ class Schoolmeal extends BaseController
             'MEAL_DT'   => $list->MEAL_DT,
             'MEAL_TP'   => $list->MEAL_TP
         ]);
+
         $c = [
             'GB'            => $list->GB,
             'MEAL_TP'       => $list->MEAL_TP,
@@ -274,7 +246,9 @@ class Schoolmeal extends BaseController
                 'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
                 'data' => $c ,
                 'auth' => $this->userinfo,
-                'is_teacher' => $this->is_teacher
+                'aca_id'        => $this->aca_id,
+                'user_id'       => $this->user_id,
+                'is_teacher'    => $this->is_teacher
             ];                
 
         return $this->template('schoolmeal/todayedit', $data , 'sub');
@@ -342,7 +316,7 @@ class Schoolmeal extends BaseController
         
         $meal = new \App\Models\SchoolMeal();
 
-        $file = new \App\Controllers\FileUpload();
+        $fileUpload = new \App\Controllers\FileUpload();
 
         $enc = $this->data['enc'];
         $enc_request = json_decode( base64_decode($enc) , true );
@@ -359,9 +333,9 @@ class Schoolmeal extends BaseController
         ]);
 
         if (is_array($fpa)){
-            foreach ( $fpa as $f ){
-                $param = ['seq' => $f['APND_FILE_SEQ'] , 'url' => $f['FILE_PATH'] . "/" . $f['FILE_NM'] . '.' . $f['FILE_EXT'] , 'tb' => '_ACA_MEAL_DAILY_APND_FILE'] ;
-                $file->removeFile($param);
+            foreach ( $fpa as $file ){
+                $param = ['seq' => $file->SEQ , 'url' => $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT , 'tb' => '_ACA_MEAL_DAILY_APND_FILE'] ;
+                $fileUpload->removeFile($param);
             }
         }
         
@@ -378,4 +352,3 @@ class Schoolmeal extends BaseController
     }
 }
 
-    

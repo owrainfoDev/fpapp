@@ -123,7 +123,7 @@ $(document).ready(function(){
     $(document).on('click', 'div.menu_cont > span[href]' , function(e){
         e.preventDefault();
 
-        var token = '5GVs4381FJ20Cxysysy7Yy5zwTQuATwOjT+yGj0IN5cK3yk3KBlLDiR4xXJX2Jl85pa/vf/BkzKqvNMRmqUSG0bWz9w59da1K6I0u6OdCOh1fYE80FxMYgDuYpuI7tOXuZl7wH0qWNxcaNDppgkC+3jGY2bNYwrk/iBw7herwS9x2ILw+euzDq17X4X8xYkc4eO+Xjgl/qNq70K8ugfqU8CHC+K20LzGQRPSXDqDGJELT94VDjUTN7VEgQJNERiy';
+        var token = '5GVs4381FJ20Cxysysy7Yy5zwTQuATwOjT+yGj0IN5cK3yk3KBlLDiR4xXJX2Jl85pa/vf/BkzKqvNMRmqUSG0bWz9w59da1K6I0u6OdCOh1fYE80FxMYgDuYpuI7tOXDGgfAsdcQ+vB2QnsbVdO/IXxs8on1BBYQzi2AeXbUzUmBzpipIikB4g9cm6ZmKUH9UhwBp8lpnDR6cxJYVZHrk+pFj9FMnFMmTfk6xVRIj8BW/F3of24UOXGyh/TggRQ';
         
         var href = $(this).attr('href');
 

@@ -110,11 +110,11 @@
 
         public function _aca_meal_daily_file_select($params){
             $query = $this->db->table('TB_ACA_MEAL_DAILY_APND_FILE')
-                    ->select("*")
+                    ->select("APND_FILE_SEQ AS SEQ , FILE_NM AS FILE_NAME , FILE_PATH , FILE_EXT , FILE_URL , THUMBNAIL , FILE_SIZE , ORIGIN_FILE_NM AS FILE_ORG_NAME")
                     ->where('ACA_ID', $params['ACA_ID'])
                     ->where('MEAL_DT', $params['MEAL_DT'])
                     ->where('MEAL_TP', $params['MEAL_TP']);
-            $result = $query->get()->getResultArray();
+            $result = $query->get()->getResult();
             if (!$result){
                 return false;
             } else {

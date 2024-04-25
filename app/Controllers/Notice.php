@@ -431,13 +431,8 @@ class Notice extends BaseController
             ];
 
             $noticemodel->_noti_std_insert($subparams);
-
-            
-
             $parent_id = $students->getParentsInfoFromStudents($std);
             $stdinfo = $students->getUserInfo($std);
-
-            // var_dump($stdinfo);
             
             $pushparams = [
                 'SENDER' => $this->data['USER_ID'], 

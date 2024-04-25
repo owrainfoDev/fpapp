@@ -185,29 +185,31 @@
         }
 
         public function _noti_main_update($params){
-            $query = "UPDATE TB_NOTI SET 
-                        TITLE           = '" . $params['TITLE'] ."' ,
-                        CNTS            = '" . $params['CNTS'] . "' ,
-                        UPT_DTTM        = '" . $params['UPT_DTTM'] . "',
-                        UPT_USER_ID     = '" . $params['UPT_USER_ID'] ."' 
-                    WHERE NOTI_SEQ      = '" . $params['NOTI_SEQ'] ."' 
-            ";
-            $result = $this->db->query($query);
+            $param = [
+                    'TITLE' => $params['TITLE'] ,
+                    'CNTS' => $params['CNTS'],
+                    'UPT_DTTM' => $params['UPT_DTTM'],
+                    'UPT_USER_ID' => $params['UPT_USER_ID'],
+            ];
 
-            return $result;
+            return $this->db->table('TB_NOTI')
+                ->set($param)
+                ->where('NOTI_SEQ' , $params['NOTI_SEQ'])
+                ->update();
         }
 
         public function _noti_main_delete($params){
-            $query = "UPDATE TB_NOTI SET 
-                        UPT_DTTM        = '" . $params['UPT_DTTM'] . "',
-                        UPT_USER_ID     = '" . $params['UPT_USER_ID'] ."' ,
-                        USE_YN          = 'N' 
-                    WHERE NOTI_SEQ      = '" . $params['NOTI_SEQ'] ."' 
-                    AND ENT_USER_ID     = '" . $params['USER_ID'] . "'
-            ";
-            $result = $this->db->query($query);
+            $param = [
+                    'USE_YN' => 'N',
+                    'UPT_DTTM' => $params['UPT_DTTM'],
+                    'UPT_USER_ID' => $params['UPT_USER_ID'],
+            ];
 
-            return $result;
+            return $this->db->table('TB_NOTI')
+                ->set($param)
+                ->where('NOTI_SEQ' , $params['NOTI_SEQ'])
+                ->where('ENT_USER_ID' , $params['USER_ID'])
+                ->update();
         
         }
 
@@ -236,17 +238,9 @@
                         'SEND_DTTM' => $params['SEND_DTTM']
                     ])
                 ->upsert();
-                // ->getCompiledUpsert();
-            //         die();
-
-            // return $this->db->table('TB_NOTI_READ')->insert($params);
+                
         }
-        // $subparams = [
-        //     'NOTI_SEQ' => $this->data['noti_seq'],
-        //     'STD_ID' => $std,
-        //     'SEND_DTTM' => date("Y-m-d H:i:s")
-        // ];
-
+        
 
         public function _getSeq(){
             $noti_seq = $this->db->query("select FN_GET_JOB_SEQ('TB_NOTI') as NOTI_SEQ ")->getRow(0);

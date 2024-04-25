@@ -69,13 +69,13 @@
 <?php endforeach;?>
 <?php else:?>
     <div class="meal today_meal js-load block">
-    <div class="t_info">
-        <div class="meal_title title"><span><?php echo $list['today']; ?></span></div>
-        
+        <div class="t_info">
+            <div class="meal_title title"><span><?php echo $list['today']; ?></span></div>
+            
+        </div>
+        <div class="meal_cont">
+            <p class="noMeal">등록된 급식이 없습니다.</p>
+        </div>
     </div>
-    <div class="meal_cont">
-        <p class="noMeal">등록된 급식이 없습니다.</p>
-    </div>
-</div>
 <?php endif;?>
 

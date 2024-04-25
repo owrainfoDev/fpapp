@@ -11,43 +11,41 @@ class Schoolmealmonthly extends BaseController
     public $pagename = '월간식단표';
     public $pn = 'Schoolmealmonthly';
 
-    protected $data;
+    protected $data = [];
     protected $meal;
     protected $authinfo;
-    protected $user_id;
+    // protected $user_id;
     protected $userinfo;
     protected $is_teacher;
-    protected $stdInfo;
-    protected $aca_id;
-    protected $class_list;
     protected $year;
+    protected $class_list;
+    protected $stdInfo;
+    protected $limit = 5;
+    protected $aca_id;
+    protected $login;
+    protected $std_id;
+    protected $user_id;
+    protected $checkAuth;
+    protected $detail_url = false ;
+    protected $request;
 
     public function __construct()
     {
+        $this->request = \Config\Services::request();
+
+        $sendflag = isset($_POST['sendflag']) ?? '';
         $session = session();
-        $this->user_id = $session->get('_user_id');
-        $this->authinfo = new \App\Models\AuthorInfo($this->user_id);
-        $this->authinfo->year = $session->get("year");
-        $this->userinfo = $this->authinfo->info();
-        $this->is_teacher = $this->authinfo->is_teacher();
-        $this->year = $session->get("year");
-
-        $students = new \App\Models\Students();
-        $params = [
-            'userid' => $this->user_id,
-            'aca_id' => $this->userinfo->ACA_ID,
-            'is_teacher' => $this->is_teacher === true ? "Y" : "N",
-            'year' => $this->year
-        ];
-
-        $this->aca_id = $this->userinfo->ACA_ID;
-        if ($this->is_teacher !== true) {
-            $this->stdInfo = $this->authinfo->stdInfo($session->get('_std_id'));
-            $params['std_id'] = $session->get("_std_id");
-            $this->aca_id = $this->stdInfo['ACA_ID'];
-        }
-
-        $this->class_list = $students->getClassListFromTeacher($params);  // 학원 리스트
+        if (! $session->has('user_id') || $sendflag == "Y"){
+            $this->getUserAuth();
+        } 
+        // $this->getUserAuth();
+        $this->is_teacher = $session->get('is_teacher');
+        $this->year = $session->get('year');
+        $this->user_id = $session->get('user_id');
+        $this->std_id = $session->get('std_id');
+        $this->aca_id = $session->get('aca_id');
+        $this->class_list = $session->get('class_list');
+        $this->checkAuth = $session->get('checkAuth');
     }
 
     public function index(){
@@ -73,7 +71,7 @@ class Schoolmealmonthly extends BaseController
             'html' => $content['html'],
             'cnt' => $content['cnt'],
             'auth' => $this->userinfo,
-            'is_teacher' => $this->authinfo->is_teacher()
+            'is_teacher' => $this->is_teacher
         ];
         return $this->template('schoolmeal/schoolmealmonthly', $data , 'sub');
     }

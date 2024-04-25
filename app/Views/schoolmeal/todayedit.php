@@ -7,16 +7,37 @@
 
     $editfiles = [];
 
-    if (isset($editfile) && $editfile ){
-        foreach ($editfile as $file){
-            $editfiles[] = [
-                'link' => $file['FILE_PATH'] . "/" . $file['FILE_NM'] . "." . $file['FILE_EXT'],
-                'orgfilename' => $file['ORIGIN_FILE_NM'],
-                'size' => $file['FILE_SIZE'],
-                'file_seq' => $file['APND_FILE_SEQ']
-            ];
+    foreach ($data['images'] as $file){
+
+        if ( $file->FILE_URL == '' ||  ! file_exists( substr(WRITEPATH , 0 , -1) . $file->FILE_URL) ) {
+            $filepath = $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT;
+            $filepath =  str_replace( _ROOT_PATH , '' , $filepath ) ;
+            
+        }else {
+            $filepath = $file->FILE_URL;
         }
+
+        
+        $filepath = WRITEPATH . $filepath;
+
+        // if (!file_exists($filepath)) continue;
+
+        // $filepath = str_replace('//', '/', $filepath);
+        // $f = new \CodeIgniter\Files\File($filepath);
+        // $type = $f->getMimeType();
+        if ( $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT == "/.") continue;
+
+        $photos[] = [
+            'link' => $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT,
+            'orgfilename' => $file->FILE_ORG_NAME,
+            'size' => $file->FILE_SIZE,
+            'file_seq' => $file->SEQ,
+            'ext' => $file->FILE_EXT,
+            // 'thumbnail' => $file->THUMBNAIL == "Y" ? $file->FILE_PATH . "/" . $file->FILE_NAME . ".jpg" : $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT
+            'thumbnail' => getThumbnailPreview($filepath)
+        ];
     }
+
 
 ?>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -73,7 +94,7 @@
                 
                 </div>
                 <div class="btn_box">
-                    <button type="submit" id="confirmSubmitBtn">수정</button>
+                    <button type="button" id="confirmSubmitBtn">수정</button>
                 </div>
             </form>
         </div>
@@ -92,9 +113,10 @@
 <!-- dropzone -->
 
 <script>
+
 var images = [
-    <?php foreach($editfiles as $file): ?>
-    {name:"<?php echo $file['ORIGIN_FILE_NM']?>", url: "<?php echo $file['link']?>", size: "<?php echo $file['size']?>", fileSeq: "<?php echo $file['file_seq'] ?>" , tb:"_ACA_MEAL_DAILY_APND_FILE"},
+    <?php foreach($photos as $file): ?>
+    {name:"<?php echo $file['orgfilename']?>", url: "<?php echo $file['link']?>", size: "<?php echo $file['size']?>", fileSeq: "<?php echo $file['file_seq'] ?>" , tb:"_ACA_MEAL_DAILY_APND_FILE" , thumbnail:"<?php echo $file['thumbnail']?>"},
     <?php endforeach; ?>
 ] 
 
@@ -110,7 +132,7 @@ for(let i = 0; i < images.length; i++) {
     // Call the default addedfile event handler
     myDropzone.emit("addedfile", mockFile);
     // And optionally show the thumbnail of the file:
-    myDropzone.emit("thumbnail", mockFile, img.url);
+    myDropzone.emit("thumbnail", mockFile, img.thumbnail);
     // Make sure that there is no progress bar, etc...
     myDropzone.emit("complete", mockFile);
     // If you use the maxFiles option, make sure you adjust it to the
@@ -151,60 +173,12 @@ $("#SNACK_DESC").select2({
     }
 });
 
-var validobj = $("#fileupload").validate({
-    onkeyup: false,
-    errorClass: "myErrorClass",
-    errorPlacement: function(error, element) {
-        var elem = $(element);
-        error.insertAfter(element);
-    },
-    highlight: function(element, errorClass, validClass) {
-        var elem = $(element);
-        if (elem.hasClass("select2-offscreen")) {
-            $("#s2id_" + elem.attr("id") + " ul").addClass(errorClass);
-        } else {
-            elem.addClass(errorClass);
-        }
-    },
-    unhighlight: function(element, errorClass, validClass) {
-        var elem = $(element);
-        if (elem.hasClass("select2-offscreen")) {
-            $("#s2id_" + elem.attr("id") + " ul").removeClass(errorClass);
-        } else {
-            elem.removeClass(errorClass);
-        }
-    },
-    submitHandler: function(form) {
-        Swal.fire({ 
-            text : "식단을 수정하시겠습니까? " , 
-            icon: "info",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "확인",
-            cancelButtonText:"취소"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if (myDropzone.files != "") {
-                    // console.log(myDropzone.files);
-                    myDropzone.processQueue();
-                } else {
-                    goSubmit();
-                }
-            }else{
-                return false;
-            }
-        });
-    }
-});
-
-
 function goSubmit(){
     var forms = $('form#fileupload').serializeObject();
-    forms.ACA_ID = content_data.ACA_ID;
-    forms.USER_ID = content_data.USER_ID;
-    forms.files = content_data.files
-    forms.is_teacher = content_data.is_teacher;
+    forms.ACA_ID = '<?php echo $aca_id;?>';
+    forms.USER_ID = '<?php echo $user_id;?>';
+    forms.is_teacher = '<?php echo $is_teacher;?>'
+    forms.files = dropzonefiles;
     forms.enc = '<?php echo $seq;?>'
 
     fetch("/schoolmeal/proc/todaywriteEdit", {
@@ -223,7 +197,7 @@ function goSubmit(){
                 toast: true,
                 position: 'center-center',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 500,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -259,6 +233,84 @@ $(document).on("select2-opening", function(arg) {
     }
 });
     
+$(document).ready(function(){
+    
+    $(document).on('click' , '#confirmSubmitBtn' , function(){
+        var alertTitle = "오늘의 급식";
+        var alerticon = "error";
+
+        if ( $('#MEAL_NM').val() == ''){
+            Swal.fire({
+                title: alertTitle,
+                text: "제공급식 제목을 입력하여 주십시요",
+                icon: alerticon,
+                didClose: () => {
+                    $("#MEAL_NM").focus();
+                }
+            });
+            return false;
+        }
+
+        if ( $('#MEAL_DESC').val() == null){
+            Swal.fire({
+                title: alertTitle,
+                text: "식단을 입력하여 주십시요",
+                icon: alerticon,
+                didClose: () => {
+                    $("#MEAL_DESC").focus();
+                }
+            });
+            return false;
+        }
+
+        if ( $('#SNACK_DESC').val() == null){
+            Swal.fire({
+                title: alertTitle,
+                text: "간식을 입력하여 주십시요",
+                icon: alerticon,
+                didClose: () => {
+                    $("#SNACK_DESC").focus();
+                }
+            });
+            return false;
+        }
+
+        if ( DropzoneFileTotal < 1 ) {
+            Swal.fire({
+                title: alertTitle,
+                text: "오늘의 급식 사진을 등록하여 주십시요",
+                icon: alerticon
+            });
+
+            return false;
+        }
+
+        console.log( DropzoneFileTotal );
+
+        Swal.fire({ 
+            text : "오늘의 급식 식단을 수정하시겠습니까? " , 
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "확인",
+            cancelButtonText:"취소"
+        }).then((result) => {
+            loadingShowHide();
+            if (result.isConfirmed) {
+                if (myDropzone.files != "") {
+                    // console.log(myDropzone.files);
+                    myDropzone.processQueue();
+                } else {
+                    goSubmit();
+                }
+            }else{
+                loadingShowHide();
+                return false;
+            }
+        });
+    } )
+})
 
 
 

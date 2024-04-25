@@ -30,21 +30,12 @@
         <?php endif; ?>
         
     </div>
-    <!-- [ 교사앱 : 삭제 모달 ]  -->
-    <!-- <div class="modal">
-        <div class="cont">
-            <p>삭제하시겠습니까?</p>
-            <div class="btn">
-                <button class="cancel">취소</button>
-                <button type="" class="confirm">확인</button>
-            </div>
-        </div>
-    </div> -->
+
 </div>
 
 <script>
     $(document).ready(function(){
-        var page = 1;
+        var page = 2;
         $(document).on('click','#moreSchoolMeal', function(){
             $.get('/schoolmeal/ajaxmoreschoolmeal' , {more:page}, function( response ){
                 
@@ -59,7 +50,7 @@
                 console.log(errorThrown);
             })
         })
-        $('#moreSchoolMeal').trigger('click');
+        // $('#moreSchoolMeal').trigger('click');
 
         $(document).on('click','#mealEditBtn', function(){
             var enc = $(this).data('enc');
@@ -95,7 +86,7 @@
                             toast: true,
                             position: 'center-center',
                             showConfirmButton: false,
-                            timer: 1000,
+                            timer: 500,
                             timerProgressBar: true,
                             didOpen: (toast) => {
                                 toast.addEventListener('mouseenter', Swal.stopTimer)
