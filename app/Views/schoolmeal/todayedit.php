@@ -2,29 +2,17 @@
     $meal_desc = explode("/",$data['MEAL_DESC']);
     $snack_desc = explode("/",$data['SNACK_DESC']);
     $seq = $data['enc'];
-    
     $editfile = $data['images'];
-
-    $editfiles = [];
+    $photos = [];
 
     foreach ($data['images'] as $file){
-
         if ( $file->FILE_URL == '' ||  ! file_exists( substr(WRITEPATH , 0 , -1) . $file->FILE_URL) ) {
             $filepath = $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT;
             $filepath =  str_replace( _ROOT_PATH , '' , $filepath ) ;
-            
         }else {
             $filepath = $file->FILE_URL;
         }
-
-        
         $filepath = WRITEPATH . $filepath;
-
-        // if (!file_exists($filepath)) continue;
-
-        // $filepath = str_replace('//', '/', $filepath);
-        // $f = new \CodeIgniter\Files\File($filepath);
-        // $type = $f->getMimeType();
         if ( $file->FILE_PATH . "/" . $file->FILE_NAME . "." . $file->FILE_EXT == "/.") continue;
 
         $photos[] = [

@@ -5,6 +5,7 @@ namespace App\Controllers;
 use \Hermawan\DataTables\DataTable;
 use CodeIgniter\Model;
 use CodeIgniter\Files\File;
+use CodeIgniter\HTTP\IncomingRequest;
 
 
 class Schoolmeal extends BaseController
@@ -114,7 +115,8 @@ class Schoolmeal extends BaseController
                 'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
                 'list' => $dd,
                 'auth' => $this->userinfo,
-                'is_teacher' => $this->is_teacher
+                'is_teacher' => $this->is_teacher,
+                'ACA_ID' => $this->aca_id
             ];
 
             $this->template('schoolmeal/schoolmealmore', $data1 , 'none');
@@ -131,12 +133,23 @@ class Schoolmeal extends BaseController
     }
 
     public function write(){
+
+        $request = service('request');
+        $enc = $request->getGet('enc');
+
+        $today = date("Y-m-d");
+        if  ($enc != null){
+            $enc_request = json_decode( base64_decode($enc) , true );
+            $today = $enc_request['MEAL_DT'];
+        }
+
         $data = [
             'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
             'auth' => $this->userinfo,
             'aca_id'        => $this->aca_id,
             'user_id'       => $this->user_id,
-            'is_teacher'    => $this->is_teacher
+            'is_teacher'    => $this->is_teacher,
+            'today'         => $today
         ];
         return $this->template('schoolmeal/todaywrite', $data , 'sub');
     }
@@ -144,7 +157,6 @@ class Schoolmeal extends BaseController
     public function proc($func){
         $content = trim(file_get_contents("php://input"));
         $this->data = json_decode($content, true);
-
 
         if ($content == "" && ( $_REQUEST ) ){
             $this->data = $_REQUEST;
@@ -204,6 +216,10 @@ class Schoolmeal extends BaseController
                     'ORIGIN_FILE_NM' => $file['ORIGIN_FILE_NM'],
                     'FILE_SIZE' => $file['FILE_SIZE']
                 ];
+
+                if ( $thumbnail = mp4tojpg( $file['FILE_PATH'] , $file['FILE_NM'] , $file['FILE_EXT'] ) ) {
+                    $fileparams['THUMBNAIL'] = "Y";
+                }
                 $meal->_aca_meal_daily_file_insert($fileparams);
             }
         }
@@ -211,12 +227,16 @@ class Schoolmeal extends BaseController
         return json_encode(['status' => 'success' , 'msg' => "등록되었습니다." , 'redirect_to' => "/schoolmeal/"]);
     }
 
-    public function edit($enc){
-        $enc_request = json_decode( base64_decode($enc) , true );
+    public function edit(){
+        $request = service('request');
+        $enc = $request->getGet('enc');
 
+        $enc_request = json_decode( base64_decode($enc) , true );
         $params['ACA_ID'] = $enc_request['ACA_ID'];
         $params['MEAL_TP'] = $enc_request['MEAL_TP'];
         $params['MEAL_DT'] = $enc_request['MEAL_DT'];
+
+        
 
         $meal = new \App\Models\SchoolMeal();
         
@@ -305,6 +325,11 @@ class Schoolmeal extends BaseController
                     'ORIGIN_FILE_NM' => $file['ORIGIN_FILE_NM'],
                     'FILE_SIZE' => $file['FILE_SIZE']
                 ];
+
+                if ( $thumbnail = mp4tojpg( $file['FILE_PATH'] , $file['FILE_NM'] , $file['FILE_EXT'] ) ) {
+                    $fileparams['THUMBNAIL'] = "Y";
+                }
+                
                 $meal->_aca_meal_daily_file_insert($fileparams);
             }
         }

@@ -54,7 +54,14 @@
 
         $(document).on('click','#mealEditBtn', function(){
             var enc = $(this).data('enc');
-            location.href="/schoolmeal/edit/" + enc;
+            location.href="/schoolmeal/edit?enc=" + enc;
+        })
+
+        
+        $(document).on('click' , '.mealWriteBtn' , function(){
+            // console.log( ' 123123');
+            var enc = $(this).data('enc');
+            location.href="/schoolmeal/write?enc=" + enc;
         })
 
         $(document).on('click', '.mealDeleteBtn', function(){

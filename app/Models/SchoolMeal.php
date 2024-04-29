@@ -115,8 +115,10 @@
                     ->where('MEAL_DT', $params['MEAL_DT'])
                     ->where('MEAL_TP', $params['MEAL_TP']);
             $result = $query->get()->getResult();
+
+
             if (!$result){
-                return false;
+                return [];
             } else {
                 return $result;
             }
@@ -149,7 +151,6 @@
             }
         }
         
-
         // 월간 급식
         public function _aca_meal_monthly_list($params , $count = 0){
 
@@ -173,9 +174,10 @@
             if ($page == 1) {
                 $query = $query->limit(1);
             } else {
-                $query = $query->limit( $page_first , $per_page );
+                $query = $query->limit( $per_page , $page_first  );
             }
             $query = $query->get()->getResult();
+
             return $query;
         }
 
@@ -213,8 +215,11 @@
                 'FILE_SIZE' => $params['FILE_SIZE'],
                 'FILE_PATH' => $params['FILE_PATH'],
                 'FILE_EXT' => $params['FILE_EXT'],
-                'FILE_URL' => $params['FILE_URL']
+                'FILE_URL' => $params['FILE_URL'],
             ];
+
+            $data['THUMBNAIL'] = isset($params['THUMBNAIL']) ? $params['THUMBNAIL'] : 'N';
+            
             $query = $this->db->table("TB_ACA_MEAL_MONTHLY")
                         ->where('ACA_ID', $params['ACA_ID'])
                         ->where('MEAL_YM', $params['MEAL_YM'])

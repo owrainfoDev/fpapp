@@ -10,7 +10,7 @@
     <?php $enc = base64_encode($json_seq)?>
 <div class="meal today_meal js-load block">
     <div class="t_info">
-        <div class="meal_title title"><span><?php echo $li['MEAL_DT'];?></span></div>
+        <div class="meal_title title"><span><?php echo DateWithWeekName($li['MEAL_DT']);?></span></div>
         <div class="meal_author author"><span><?php echo $li['TEACHER_NM']; ?></span></div>
         <div class="meal_date date"><span><span><?php echo $li['ENT_DTTM']; ?></span></div>
         <?php if ( $is_teacher == true ): ?>
@@ -68,10 +68,26 @@
 </div>
 <?php endforeach;?>
 <?php else:?>
+    <?php 
+        $json_seq = json_encode([
+            'ACA_ID' => $ACA_ID,
+            'MEAL_TP' => 'B',
+            'MEAL_DT' =>  $list['today']
+        ]);
+    ?>
+    <?php $enc = base64_encode($json_seq)?>
+
     <div class="meal today_meal js-load block">
         <div class="t_info">
-            <div class="meal_title title"><span><?php echo $list['today']; ?></span></div>
-            
+            <div class="meal_title title"><span><?php echo DateWithWeekName($list['today']);?></span></div>
+            <div class="meal_author author"><span>&nbsp;</span></div>
+        <div class="meal_date date"><span><span>&nbsp;</span></div>
+            <?php if ( $is_teacher == true ): ?>
+            <!-- [ 교사앱 : 수정/삭제 버튼 ] -->
+            <div class="t_edit_btn btn_box">
+                <button type="button" class="edit left mealWriteBtn" id="mealWriteBtn" data-enc="<?php echo $enc; ?>" data-aca_id="<?php echo $ACA_ID?>" data-tp="B" data-dt="<?php echo $list['today']?>" style="width:50px">둥록</button>
+            </div>
+            <?php endif; ?>
         </div>
         <div class="meal_cont">
             <p class="noMeal">등록된 급식이 없습니다.</p>

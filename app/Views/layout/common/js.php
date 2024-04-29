@@ -38,6 +38,7 @@
         const form = document.createElement('form');
         form.method = method;
         form.action = path;
+        form.target = "_blank";
         for (const key in params) {
             if (params.hasOwnProperty(key)) {
             const hiddenField = document.createElement('input');

@@ -141,7 +141,13 @@ label.error
             }
             DropzoneFileTotal++;
         } else {
-            
+            if ( this.options.maxFiles <= DropzoneFileTotal ) {
+                Swal.fire({ text : "파일 업로드 가능 갯수는 " + this.options.maxFiles + "개 입니다."  , icon: "question" });
+                this.removeFile(file);   
+                DropzoneFileTotal++;
+                return ;   
+            }
+
             let ext = getFileExtension(file.upload.filename);
             let accept_ext = this.options.acceptedFiles;
             
@@ -166,6 +172,7 @@ label.error
                     }
                 }
                 DropzoneFileTotal++;
+                console.log( '123');
             }
 
             // Hookup the start button
@@ -264,6 +271,7 @@ label.error
             }
         }
         DropzoneFileTotal--;
+        myDropzone.options.maxFiles++;
         myDropzone.files = myDropzone.files.filter(x => x !== null);
     });
 

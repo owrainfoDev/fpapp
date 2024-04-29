@@ -13,7 +13,7 @@
         <!-- 오늘의 급식 식단 등록 -->
         <div class="today_meal_write">
             <form action="" method="post"  id="fileupload" enctype="multipart/form-data">
-                <input type="hidden" name="ACA_NM" value="<?php echo $auth->ACA_NM;?>">
+                
                 <div class="meal_cont">
                     <div class="date">
                         <p class="bg_comm">날짜</p>
@@ -22,21 +22,22 @@
                 </div>
                 <div class="form_file">
                     <span class="title">파일첨부</span>
-                    
-                    <div style="width:100%" id="dropzone" class="dropzone"></div>
-                    <!-- [ 카메라 앱으로 이동? ] -->
                     <div class="camera">
-                        <!-- <span>사진2 동영상1/1</span> -->
                         <i class="icon_image"></i>
                     </div>
+                    <div style="width:100%" id="dropzone" class="dropzone"></div>
+                    <!-- [ 카메라 앱으로 이동? ] -->
+                    
                    
                     <!-- <p class="comm">
                         동영상 1개, 사진 100개까지 첨부할 수 있습니다.
                         <span>(동영상 30MB이하, 총 용량 500MB 이하)</span>
                     </p> -->
                 </div>
+
+
                 <div class="btn_box">
-                    <button type="submit" id="confirmSubmitBtn">등록</button>
+                    <button type="button" id="confirmSubmitBtn">등록</button>
                 </div>
                 
             </form>
@@ -46,7 +47,10 @@
 
 <style>
     .t_content .form_file{
-        flex-wrap:nowrap;
+        margin: 0;
+    }
+    .meal_content .meal_cont {
+        margin: 0;
     }
 </style>
 
@@ -67,63 +71,14 @@
 </style>
 <script>
 
-var validobj = $("#fileupload").validate({
-    onkeyup: false,
-    errorClass: "myErrorClass",
-    errorPlacement: function(error, element) {
-        var elem = $(element);
-        error.insertAfter(element);
-    },
-    highlight: function(element, errorClass, validClass) {
-        var elem = $(element);
-        if (elem.hasClass("select2-offscreen")) {
-            $("#s2id_" + elem.attr("id") + " ul").addClass(errorClass);
-        } else {
-            elem.addClass(errorClass);
-        }
-    },
-    unhighlight: function(element, errorClass, validClass) {
-        var elem = $(element);
-        if (elem.hasClass("select2-offscreen")) {
-            $("#s2id_" + elem.attr("id") + " ul").removeClass(errorClass);
-        } else {
-            elem.removeClass(errorClass);
-        }
-    },
-    submitHandler: function(form) {
-        Swal.fire({ 
-            text : "월간 식단표를 등록하시겠습니까? " , 
-            icon: "info",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "확인",
-            cancelButtonText:"취소"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if (myDropzone.files != "") {
-                    // console.log(myDropzone.files);
-                    myDropzone.processQueue();
-                } else {
-                    Swal.fire({ text : "파일을 첨부해 주세요" , icon: "warning"});
-                    return false;
 
-                    // goSubmit();
-                }
-            }else{
-                
-                return false;
-            }
-        });
-    }
-});
 
 function goSubmit(){
     var forms = $('form#fileupload').serializeObject();
-    forms.ACA_ID = content_data.ACA_ID;
-    forms.USER_ID = content_data.USER_ID;
-    forms.files = content_data.files
-    forms.is_teacher = content_data.is_teacher;
+    forms.ACA_ID = '<?php echo $aca_id;?>';
+    forms.USER_ID = '<?php echo $user_id;?>';
+    forms.is_teacher = '<?php echo $is_teacher;?>'
+    forms.files = dropzonefiles;
 
     fetch("/schoolmealmonthly/proc/writeproc", {
         method: "POST",
@@ -137,12 +92,13 @@ function goSubmit(){
         if (data.status == 'fail'){
             swal.fire({text:data.msg , icon:"error"})
             myDropzone.emit("resetFiles");
+            loadingShowHide();
         } else {
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'center-center',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 500,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -160,4 +116,63 @@ function goSubmit(){
         }
     });
 }
+
+
+$(document).ready(function(){
+    
+    $(document).on('click' , '#confirmSubmitBtn' , function(){
+        var alertTitle = "월간 식단표";
+        var alerticon = "error";
+
+        if ( $('#MEAL_YM').val() == ''){
+            Swal.fire({
+                title: alertTitle,
+                text: "날짜를 입력하여 주십시요",
+                icon: alerticon,
+                didClose: () => {
+                    $("#MEAL_YM").focus();
+                }
+            });
+            return false;
+        }
+
+
+        if ( DropzoneFileTotal < 1 ) {
+            Swal.fire({
+                title: alertTitle,
+                text: "월간 식단표 파일을 등록하여 주십시요",
+                icon: alerticon
+            });
+
+            return false;
+        }
+
+        Swal.fire({ 
+            text : "월간 식단표를 등록하시겠습니까? " , 
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "확인",
+            cancelButtonText:"취소"
+        }).then((result) => {
+            loadingShowHide();
+            if (result.isConfirmed) {
+                if (myDropzone.files != "") {
+                    // console.log(myDropzone.files);
+                    myDropzone.processQueue();
+                } else {
+                    Swal.fire({ text : "파일을 첨부해 주세요" , icon: "warning"});
+                    return false;
+
+                    // goSubmit();
+                }
+            }else{
+                
+                return false;
+            }
+        });
+    } )
+})
+
 </script>

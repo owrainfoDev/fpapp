@@ -37,7 +37,8 @@ $routes->group('/schoolmeal' ,  ['filter' => 'isLoggedIn'] , function($routes){
     $routes->add('','Schoolmeal::index');
     $routes->add('ajaxmoreschoolmeal','Schoolmeal::moreschoolmeal');
     $routes->add('write' , 'Schoolmeal::write');
-    $routes->add('edit/(:segment)' , 'Schoolmeal::edit/$1');
+    $routes->add('write/(:segment)' , 'Schoolmeal::write/$1');
+    $routes->add('edit' , 'Schoolmeal::edit');
     $routes->add('proc/(:segment)' , 'Schoolmeal::proc/$1');
     
 });
@@ -45,7 +46,7 @@ $routes->group('/schoolmeal' ,  ['filter' => 'isLoggedIn'] , function($routes){
 $routes->group('/schoolmealmonthly' ,  ['filter' => 'isLoggedIn'] , function($routes){
     $routes->add('','Schoolmealmonthly::index');
     $routes->add('write' , 'Schoolmealmonthly::write');
-    $routes->add('edit/(:segment)' , 'Schoolmealmonthly::edit/$1');
+    $routes->add('edit' , 'Schoolmealmonthly::edit');
     $routes->add('proc/(:segment)' , 'Schoolmealmonthly::proc/$1');
     $routes->add('ajaxmore','Schoolmealmonthly::morelist');
 });

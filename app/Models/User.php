@@ -47,6 +47,14 @@
             return $data;
         }
 
+        public function getUserAccess($user_id){
+            $query = $this->builder('TB_USER_ACCESS')->select('ACCESS_TOKEN')
+                    ->where("USER_ID" , $user_id)
+                    // ->getCompiledSelect(false);
+                    ->get();
+            return $query->getRow()->ACCESS_TOKEN ;
+        }
+
     }
 
     

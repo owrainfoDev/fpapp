@@ -32,12 +32,17 @@ class FileUpload extends BaseController
             ],
         ];
 
-        if (! $this->validate($validationRule)) {
+        
+
+        if (! @$this->validate($validationRule)) {
             $data = ['errors' => $this->validator->getErrors() , 'validationRule' => $validationRule];
+
             return json_encode($data);
         }
 
         $pn = $this->request->getPost('pn');
+
+        
 
         if ($imagefile = $this->request->getFiles()) {
             

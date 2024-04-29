@@ -18,7 +18,7 @@
                 <div class="meal_cont">
                     <div class="date">
                         <p class="bg_comm">날짜</p>
-                        <input type="date" name="MEAL_DT" id="MEAL_DT" class="required" data-msg-required="날짜를 선택하여 주십시요">
+                        <input type="date" name="MEAL_DT" id="MEAL_DT" value="<?php echo $today; ?>" class="required" data-msg-required="날짜를 선택하여 주십시요">
                     </div>
                     <div class="meal_title">
                         <p class="bg_comm">제공급식</p>

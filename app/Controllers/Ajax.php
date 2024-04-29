@@ -53,6 +53,19 @@ class Ajax extends BaseController
         return json_encode( $student_list );
     }
 
+    public function UserAccessLogin(){
+        $user_id = $this->data['user_id'];
+        $userModel = new \App\Models\User();
+        $user = $userModel->asObject()->find($user_id);
+
+        $userAccessToken = $userModel->getUserAccess($user_id);
+        return json_encode([
+                'ACA_ID' => $user->ACA_ID,
+                'USERACCESSTOKEN' => $userAccessToken,
+        ]);
+
+    }
+
     public function tempSave_save() {
         $params = [ 
             'TEMP_KEY'=> $this->data['TEMP_KEY'],

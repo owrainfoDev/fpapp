@@ -82,8 +82,6 @@ class Schoolmealmonthly extends BaseController
         $today = date("Y-m");
         $page = $request->getVar('more') == null || $request->getVar('more') == '' ? 1 : $request->getVar('more') ;
         $params = ['ACA_ID' => $this->aca_id,'MEAL_YM' => $today , 'page' => $page];
-
-
         $cnt = $meal->_aca_meal_monthly_list($params , 1);
 
         $list = $meal->_aca_meal_monthly_list($params);
@@ -117,19 +115,22 @@ class Schoolmealmonthly extends BaseController
             'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
             'html' => $content,
             'auth' => $this->userinfo,
-            'is_teacher' => $this->authinfo->is_teacher()
+            'aca_id'        => $this->aca_id,
+            'user_id'       => $this->user_id,
+            'is_teacher'    => $this->is_teacher
         ];
         return $this->template('schoolmeal/schoolmealmonthlywrite', $data , 'sub');
     }
 
     public function writeproc(){
         $meal = new \App\Models\SchoolMeal();
-        date_default_timezone_set('ASIA/SEOUL');
-        
+        $aca = new \App\Models\Aca();
+        $acaInfo = $aca->asObject()->find($this->data['ACA_ID']);
+
         $params = [
             "ACA_ID"   => $this->data['ACA_ID'] ,
             "MEAL_YM"   => $this->data['MEAL_YM'] ,
-            "MEAL_NM"   => $this->data['ACA_NM'] . " " . $this->data['MEAL_YM'] . "식단표",
+            "MEAL_NM"   => $acaInfo->ACA_NM . " " . $this->data['MEAL_YM'] . "식단표",
             "VIEW_YN" => 'Y',
             "ENT_DTTM" => date("Y-m-d H:i:s"),
             "ENT_USER_ID" => $this->data['USER_ID']
@@ -156,6 +157,11 @@ class Schoolmealmonthly extends BaseController
                     'FILE_EXT' => $file['FILE_EXT'],
                     'FILE_URL' => $file['FILE_URL']
                 ];
+
+                if ( $thumbnail = mp4tojpg( $file['FILE_PATH'] , $file['FILE_NM'] , $file['FILE_EXT'] ) ) {
+                    $fileparams['THUMBNAIL'] = "Y";
+                }
+
                 $meal->_aca_meal_monthly_file_update($fileparams);
             }
         }
@@ -163,34 +169,38 @@ class Schoolmealmonthly extends BaseController
         return json_encode(['status' => 'success' , 'msg' => "등록되었습니다." , 'redirect_to' => "/schoolmealmonthly/"]);
     }
 
-    public function edit($enc){
+    public function edit(){
         $meal = new \App\Models\SchoolMeal();
 
-        $enc_request = json_decode( base64_decode($enc) , true );
+        $request = service('request');
+        $enc = $request->getGet('enc');
 
+        $enc_request = json_decode( base64_decode($enc) , true );
         $params['ACA_ID'] = $enc_request['ACA_ID'];
         $params['MEAL_YM'] = $enc_request['MEAL_YM'];
         
         $content = $meal->_aca_meal_monthly_detail($params);
-
         $data = [
-            'header' => ['title'=> $this->pagename , 'pn' => $this->pn],
-            'data' => $content,
-            'auth' => $this->userinfo,
-            'is_teacher' => $this->authinfo->is_teacher(),
-            'enc' => $enc
+            'header'        => ['title'=> $this->pagename , 'pn' => $this->pn],
+            'data'          => $content,
+            'auth'          => $this->userinfo,
+            'aca_id'        => $this->aca_id,
+            'user_id'       => $this->user_id,
+            'is_teacher'    => $this->is_teacher,
+            'enc'           => $enc
         ];
         return $this->template('schoolmeal/schoolmealmonthlyedit', $data , 'sub');
     }
 
     public function editproc(){
         $meal = new \App\Models\SchoolMeal();
-        date_default_timezone_set('ASIA/SEOUL');
-        
+        $aca = new \App\Models\Aca();
+        $acaInfo = $aca->asObject()->find($this->data['ACA_ID']);
+
         $params = [
             "ACA_ID"   => $this->data['ACA_ID'] ,
             "MEAL_YM"   => $this->data['MEAL_YM'] ,
-            "MEAL_NM"   => $this->data['ACA_NM'] . " " . $this->data['MEAL_YM'] . "식단표",
+            "MEAL_NM"   => $acaInfo->ACA_NM . " " . $this->data['MEAL_YM'] . "식단표",
             "VIEW_YN" => 'Y',
             "UPT_DTTM" => date("Y-m-d H:i:s"),
             "UPT_USER_ID" => $this->data['USER_ID']
@@ -213,11 +223,16 @@ class Schoolmealmonthly extends BaseController
                     'FILE_EXT' => $file['FILE_EXT'],
                     'FILE_URL' => $file['FILE_URL']
                 ];
+
+                if ( $thumbnail = mp4tojpg( $file['FILE_PATH'] , $file['FILE_NM'] , $file['FILE_EXT'] ) ) {
+                    $fileparams['THUMBNAIL'] = "Y";
+                }
+
                 $meal->_aca_meal_monthly_file_update($fileparams);
             }
         }
         
-        return json_encode(['status' => 'success' , 'msg' => "수정되었습니다.." , 'redirect_to' => "/schoolmealmonthly/edit/" . $this->data['enc']]);
+        return json_encode(['status' => 'success' , 'msg' => "수정되었습니다.." , 'redirect_to' => "/schoolmealmonthly/edit?enc=" . $this->data['enc']]);
     }
 
     public function delete(){

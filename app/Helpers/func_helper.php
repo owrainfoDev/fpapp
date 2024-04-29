@@ -279,7 +279,7 @@ function mp4tojpg($filepath, $filename , $fileext ){
         case "pdf":
             $dest = $filepath . "/" . $filename . "_thumb.jpg";
             $imagick = new Imagick();
-            $imagick->readImage($source);
+            $imagick->readImage($source."[0]");
             $imagick->writeImage($dest);
         break;
         default:
@@ -324,4 +324,43 @@ function get_DRUG_STORAGE_METHOD($type){
             return "냉장";
             break;
     }
+}
+
+function DateWithWeekName($date){
+    $yoil_text_set = array("일","월","화","수","목","금","토");
+    $yoil = $yoil_text_set[date('w', strtotime($date))];
+    // $yoil = date("D" , strtotime( $date ));
+
+    $date = date("Y-m-d" , strtotime($date)) . " ". $yoil ."" ;
+
+    return $date;
+
+}
+
+function genPdfThumbnail($source, $dest)
+{
+    //$source = realpath($source);
+    $dest = dirname($source).DIRECTORY_SEPARATOR.$dest;
+    $imagick = new Imagick();
+    $imagick->readImage($source);
+    $imagick->setIteratorIndex(0);
+    $imagick->setImageFormat("png");
+    $a = $imagick->getImageBlob();
+
+    $imagick->destroy();
+    // $imagick->setImageFormat('jpg');
+
+    // var_dump($imagick);
+    return base64_encode($a);
+
+    // return $imagick;
+    // $imagick->writeImage($dest);
+    
+
+    // $im->setImageColorspace(255); // prevent image colors from inverting
+    // $im->setimageformat("jpeg");
+    // $im->thumbnailimage(160, 120); // width and height
+    // $im->writeimage($target);
+    // $im->clear();
+    // $im->destroy();
 }

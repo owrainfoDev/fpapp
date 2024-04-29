@@ -110,6 +110,7 @@
                 </span>
             </div>
         </div>
+        <input type="text" name="user_id" id="user_id" value="teacher_h1"><button type="button" id="getUser">확인</button>
     </div>
 </div>
 <?php 
@@ -117,29 +118,48 @@
     $session->destroy();
     
 ?>
+
+
 <!-- // main -->
 <script type="text/javascript">
 $(document).ready(function(){
+    $(document).on('click', '#getUser', function(){
+        
+    })
+
     $(document).on('click', 'div.menu_cont > span[href]' , function(e){
         e.preventDefault();
 
-        var token = '5GVs4381FJ20Cxysysy7Yy5zwTQuATwOjT+yGj0IN5cK3yk3KBlLDiR4xXJX2Jl85pa/vf/BkzKqvNMRmqUSG0bWz9w59da1K6I0u6OdCOh1fYE80FxMYgDuYpuI7tOXDGgfAsdcQ+vB2QnsbVdO/IXxs8on1BBYQzi2AeXbUzUmBzpipIikB4g9cm6ZmKUH9UhwBp8lpnDR6cxJYVZHrk+pFj9FMnFMmTfk6xVRIj8BW/F3of24UOXGyh/TggRQ';
-        
+        var token;
         var href = $(this).attr('href');
+        var params ;
 
-        if ( typeof href != 'undefined'){
+        var postData = {
+            user_id : $('#user_id').val()
+        };
 
-            let params = {
-                "token" : token,
-                // "std_id" : 'S00011056',
-                "aca_id" : 'HL00001',
-                "aca_year" : '2024',
-                'flag' : 'Y'
+        $.ajax({
+            type: "POST",
+            url : "/api/ajax/UserAccessLogin",
+            contentType: "application/json",
+            data: JSON.stringify( postData ),
+            dataType: "json", 
+            async: false,
+            success: function(json){
+                params = {
+                    "token" : json.USERACCESSTOKEN,
+                    // "std_id" : 'S00011056',
+                    "aca_id" : json.ACA_ID,
+                    "aca_year" : '2024',
+                    'flag' : 'Y'
+                }
+            },
+            error:function(){  
+                //에러가 났을 경우 실행시킬 코드
             }
-            
-            post(href, params );
-            
-        }
+        })
+        if ( typeof href != 'undefined') post(href, params );
+       
     })
 })
 

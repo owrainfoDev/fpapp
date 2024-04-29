@@ -11,7 +11,7 @@
         <!-- 월간식단표 -->
         <div class="month_load" id="monthLoad">
             <div class="meal_container monthly" id="containerLoad">
-                <?php // echo $html;?>
+                <?php echo $html;?>
             </div>
             <!-- 더보기 -->
             <div id="js-btn-wrap_monthly_meal" class="btn-wrap">
@@ -28,7 +28,7 @@
 
 <script>
     $(document).ready(function(){
-        var page = 1;
+        var page = 2;
         var total_page = <?php echo $cnt?>;
         $(document).on('click', '#schoolmealmonthlymore', function(){
             if (total_page >= page){
@@ -47,17 +47,20 @@
                 })
             }
         })
-        $('#schoolmealmonthlymore').trigger('click');
+        // $('#schoolmealmonthlymore').trigger('click');
         // 수정
         $(document).on('click' , '#mealEditBtn' , function(){
             var enc = $(this).data('enc');
-            location.href="/schoolmealmonthly/edit/" + enc;
-        })
+            location.href="/schoolmealmonthly/edit?enc=" + enc;
+        });
 
         // 삭제
         $(document).on('click', '.mealDeleteBtn', function(){
+
+            var enc = $(this).data('enc')
+            var delid = $(this).data('del_id');
             var forms = {
-                enc : $(this).data('enc')
+                enc : enc
             }
 
             Swal.fire({ 
@@ -96,7 +99,7 @@
                             title: '삭제 되었습니다.'
                         }).then(function (result) {
                             if (true) {
-                                if ( data.redirect_to ) location.href=data.redirect_to;
+                                $('#monthlyMeal_' + delid ).fadeOut(300, function() { $(this).remove(); } );
                             }
                         });
                     })
